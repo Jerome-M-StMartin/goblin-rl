@@ -1,0 +1,16 @@
+[package]
+name = "goblin_rl"
+version = "0.2.0" #From scratch re-write: no tutorial-based legacy code. Successful if I learn during.
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+specs = { version = "0.17.0", features = ["serde"] }
+specs-derive = "0.4.1"
+rand = "0.8.5"
+crossterm = "0.23.2"
+#serde = { version = "???", features = ["derive", "rc"] }
+#serde_json = "???" 
+#serde_derive = "???"
+#lazy_static = "???"
