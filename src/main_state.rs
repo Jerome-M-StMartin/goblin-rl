@@ -4,8 +4,7 @@
 use std::any::Any;
 use std::thread::{JoinHandle, Thread};
 
-use super::error::Gremlin;
-
+#[derive(Clone, Debug)]
 pub enum RunState {
     AwaitingInput{previous: Option<Box<RunState>>},
     GameOver,
@@ -17,6 +16,7 @@ pub enum RunState {
     PreRun,
 }
 
+#[derive(Debug)]
 pub struct MainState {
     game_world: JoinHandle<Thread>, //Game Simulation State
     gui: JoinHandle<Thread>, //GUI State
@@ -51,7 +51,7 @@ impl MainState {
     }
     
     //Used to stop the two main threads upon Game Over or Game Close
-    pub fn join_all(self) -> (Result<Thread, Box<dyn Any + Send>>, Result<Thread, Box<dyn Any + Send>>) {
+    pub fn join_threads(self) -> (Result<Thread, Box<dyn Any + Send>>, Result<Thread, Box<dyn Any + Send>>) {
         //Returns two results.
         let gw = match self.game_world.join() {
             Ok(t) => Ok(t),

@@ -58,6 +58,6 @@ fn main() {
     }
 
     //----------- End & Clean Up -----------
-    let (_, _) = ms.join_all();
+    let (_, _) = ms.join_threads();
 }
 
