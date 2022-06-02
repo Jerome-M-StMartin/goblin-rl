@@ -3,6 +3,10 @@
 
 use std::any::Any;
 use std::thread::{JoinHandle, Thread};
+use std::sync::mpsc::Sender;
+
+use super::user_input::UserInput;
+use super::common::command::Message;
 
 #[derive(Clone, Debug)]
 pub enum RunState {
@@ -20,24 +24,40 @@ pub enum RunState {
 pub struct MainState {
     game_world: JoinHandle<Thread>, //Game Simulation State
     gui: JoinHandle<Thread>, //GUI State
+    gui_tx: Sender<Message>,
+    gw_tx: Sender<Message>,
     runstate: RunState,
+    user_input: UserInput,
 }
 
 impl MainState {
-    pub fn new(game_world: JoinHandle<Thread>, gui: JoinHandle<Thread>) -> MainState {
+    pub fn new(game_world: JoinHandle<Thread>,
+               gui: JoinHandle<Thread>,
+               gui_tx: Sender<Message>,
+               gw_tx: Sender<Message>) -> MainState {
+
         MainState {
             game_world,
             gui,
+            gui_tx,
+            gw_tx,
             runstate: RunState::MainMenu,
+            user_input: UserInput::new(),
         }
     }
 
     pub fn tick(&mut self) -> Result<(), super::error::Gremlin> {
+
+        //Has there been any user input?
+        self.user_input.tick()?;
+        
+        //user_input.event guaranteed to be None after this.
+        let input_event = self.user_input.take_input_event();
+
+        //println!("{:?}\r", input_event); //For User Input Testing Only
         
         match &self.runstate {
-            RunState::AwaitingInput { previous: _prev } => {
-                self.runstate = RunState::AwaitingInput { previous: None };
-            },
+            RunState::AwaitingInput { previous: _prev } => {},
             RunState::GameOver => {},
             RunState::GameWorld => {},
             RunState::GUI => {},
