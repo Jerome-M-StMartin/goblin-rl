@@ -5,8 +5,10 @@ use std::any::Any;
 use std::thread::{JoinHandle, Thread};
 use std::sync::mpsc::Sender;
 
+use specs::WorldExt; //specs lib docs say this should be imported over just World
+
 use super::user_input::UserInput;
-use super::common::command::Message;
+use super::common::Message;
 
 #[derive(Clone, Debug)]
 pub enum RunState {
@@ -20,8 +22,8 @@ pub enum RunState {
     PreRun,
 }
 
-#[derive(Debug)]
 pub struct MainState {
+    ecs: specs::World,
     game_world: JoinHandle<Thread>, //Game Simulation State
     gui: JoinHandle<Thread>, //GUI State
     gui_tx: Sender<Message>,
@@ -37,6 +39,7 @@ impl MainState {
                gw_tx: Sender<Message>) -> MainState {
 
         MainState {
+            ecs: specs::World::new(),
             game_world,
             gui,
             gui_tx,

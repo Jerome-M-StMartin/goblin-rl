@@ -3,7 +3,7 @@
 
 use std::sync::mpsc::{Receiver, Sender};
 
-use super::common::command::Message;
+use super::common::Message;
 
 mod observer;
 

@@ -6,7 +6,11 @@
  * Structs and modules shared between both GUI and GameWorld threads.
  */
 
-pub mod command;
+//pub mod command; This is useless with channels; how should it be, now?
+
+pub enum Message {
+    Temp,
+}
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Dir {
@@ -21,4 +25,10 @@ pub enum Dir {
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
-pub struct Point { x: i32, y: i32 }
+pub struct Coords { pub x: u8, pub y: u8 }
+
+impl Coords {
+    pub fn new<T: Into<u8>>(x: T, y: T) -> Self {
+        Coords {x: x.into(), y: y.into()}
+    }
+}

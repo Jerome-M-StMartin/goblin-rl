@@ -3,7 +3,9 @@
 
 use std::sync::mpsc::{Receiver, Sender};
 
-use super::common::command::Message;
+use super::common::Message;
+
+mod map;
 
 pub struct GameWorld {
     gui_coms: (Receiver<Message>, Sender<Message>),
@@ -23,7 +25,7 @@ impl GameWorld {
 
 #[cfg(test)]
 mod tests {
-    
+
     #[test]
     fn test_0() {}
 }

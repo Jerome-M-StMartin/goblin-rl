@@ -19,8 +19,18 @@ pub enum GCODE {
     GW,
     GUI,
     Threading,
+    InvalidInput,
     OutsideErr,
     Undefined,
+}
+
+impl Gremlin {
+    pub fn new(code: GCODE, source: Option<std::io::Error>) -> Self {
+        Gremlin {
+            code,
+            source,
+        }
+    }
 }
 
 fn translate_code(code: GCODE) -> &'static str {
@@ -28,6 +38,8 @@ fn translate_code(code: GCODE) -> &'static str {
         GCODE::GW => "eneral GameWorld error",
         GCODE::GUI => "general GUI error",
         GCODE::Threading => "multithreading error",
+        GCODE::InvalidInput => "fn input is invalid",
+
         GCODE::OutsideErr => "outside error",
         GCODE::Undefined => "undefined error",
     }
@@ -69,6 +81,8 @@ impl<'a> From<std::io::Error> for Gremlin {
         }
     }
 }
+
+
 
 #[cfg(test)]
 mod tests {
