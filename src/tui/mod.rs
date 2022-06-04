@@ -3,7 +3,7 @@
 
 use std::sync::mpsc::{Receiver, SyncSender};
 
-use crate::common::Message;
+use crate::common::{Message, Ticker};
 use crate::error::Gremlin;
 
 mod observer;
@@ -20,13 +20,15 @@ impl GUIState {
     }
 
 
-    pub fn tick(&mut self) -> Result<(), Gremlin> {
-        
-        let message = self.channel.0.try_recv()?;
+    pub fn tick(&mut self) -> Result<Ticker, Gremlin> {
+        println!("TUI thread calling recv()...\r");
+        let message = self.channel.0.recv()?;
+
+        if message == Message::Exit { return Ok(Ticker::ExitProgram) } ;
 
         println!("{:?}\r", message);
         
-        Ok(())
+        Ok(Ticker::Continue)
     }
 }
 

@@ -2,7 +2,7 @@
 //May, 2022
 
 
-use crossterm::event::{Event, KeyCode};
+use crossterm::event::{Event, KeyCode, KeyModifiers};
 
 use crate::error::Gremlin;
 use crate::common::{Dir, Message};
@@ -26,7 +26,7 @@ impl UserInput {
         match event {
             Event::Key(key_event) => {
                 let code = key_event.code;
-                let _mods = key_event.modifiers; //No need at this time
+                let mods = key_event.modifiers; //No need at this time
                 match code {
                     KeyCode::Backspace => { msg = Message::Delete },
                     KeyCode::Enter => { msg = Message::Confirm },
@@ -66,6 +66,16 @@ impl UserInput {
                     },
                     KeyCode::Null => {},
                     KeyCode::Esc => { msg = Message::Cancel; },
+                }
+
+                match mods {
+                    KeyModifiers::SHIFT => {},
+                    KeyModifiers::CONTROL => {
+                        if code == KeyCode::Char('c') { msg = Message::Exit; }
+                    },
+                    KeyModifiers::ALT => {},
+                    KeyModifiers::NONE => {},
+                    _ => {},
                 }
             },
             Event::Mouse(_mouse_event) => {}, //TODO

@@ -8,7 +8,7 @@ use std::sync::mpsc::SyncSender;
 use specs::WorldExt; //specs lib docs say this should be imported over just World
 
 use crate::user_input::UserInput;
-use crate::common::Message;
+use crate::common::{Message, Ticker};
 use crate::error::Gremlin;
 
 //-------------------------------------------
@@ -30,46 +30,50 @@ pub enum RunState {
 
 pub struct MainState {
     ecs: specs::World,
-    game_world: JoinHandle<Thread>, //Game Simulation State
-    gui: JoinHandle<Thread>, //GUI State
-    gui_tx: SyncSender<Message>,
+    game_world: JoinHandle<()>, //Game Simulation State
+    tui: JoinHandle<()>, //GUI State
+    tui_tx: SyncSender<Message>,
     gw_tx: SyncSender<Message>,
     runstate: RunState,
 }
 
 impl MainState {
-    pub fn new(game_world: JoinHandle<Thread>,
-               gui: JoinHandle<Thread>,
-               gui_tx: SyncSender<Message>,
+    pub fn new(game_world: JoinHandle<()>,
+               tui: JoinHandle<()>,
+               tui_tx: SyncSender<Message>,
                gw_tx: SyncSender<Message>) -> MainState {
 
         MainState {
             ecs: specs::World::new(),
             game_world,
-            gui,
-            gui_tx,
+            tui,
+            tui_tx,
             gw_tx,
             runstate: RunState::MainMenu,
         }
     }
 
-    pub fn tick(&mut self) -> Result<(), Gremlin> {
+    pub fn tick(&mut self) -> Result<Ticker, Gremlin> {
 
         //Has there been any user input?
+        println!("blocking read in ctrlr\r");
         let user_input: Message = UserInput::blocking_read()?;
 
-        //FOR TESTING ONLY - basically testing if I can cause the game to stop running correctly
-        //which partially tests user input. Need to further test user_input by sending messages
-        //recieved by TUI thread back to the main thread to be printed via {:?}
-        if user_input == Message::Cancel {
-            //TODO: Cause TUI thread to finish
-            //TODO: Cause GameWorld thread to finish
+        //FOR TESTING ONLY - cause the game to stop running correctly
+        if user_input == Message::Exit {
+            println!("Exit branch reached!\r");
+            //Cause TUI thread to finish
+            self.tui_tx.send(Message::Exit)?;
+
+            //Cause GameWorld thread to finish
+            self.gw_tx.send(Message::Exit)?;
             
-            //return any error to force main thread to call join_threads then exit()
-            return Err(Gremlin::InvalidInput)
+            //Finish this thread
+            return Ok(Ticker::ExitProgram)
         }; 
-       
-        self.gui_tx.send(user_input)?;
+      
+        println!("send() called in ctrlr\r");
+        self.tui_tx.send(user_input)?;
 
         match &self.runstate {
             RunState::AwaitingInput { previous: _prev } => {},
@@ -82,21 +86,21 @@ impl MainState {
             RunState::PreRun => {},
         }
 
-        Ok(())
+        Ok(Ticker::Continue)
     }
     
     //Used to stop the two main threads upon Game Over or Game Close
-    pub fn join_threads(self) -> (Result<Thread, Box<dyn Any + Send>>, Result<Thread, Box<dyn Any + Send>>) {
+    pub fn join_threads(self) -> (Result<(), Box<dyn Any + Send>>, Result<(), Box<dyn Any + Send>>) {
         //Returns two results.
         let gw = match self.game_world.join() {
             Ok(t) => Ok(t),
             Err(e) => Err(e),
         };
-        let gui = match self.gui.join() {
+        let tui = match self.tui.join() {
             Ok(t) => Ok(t),
             Err(e) => Err(e),
         };
 
-        (gw, gui)
+        (gw, tui)
     }
 }

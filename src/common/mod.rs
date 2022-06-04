@@ -22,6 +22,14 @@ pub enum Message {
     Exit,
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum Ticker {
+    ExitProgram,
+    Continue,
+}
+
+unsafe impl Send for Message {}
+
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Dir {
     N,
