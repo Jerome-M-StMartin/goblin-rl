@@ -5,8 +5,8 @@
 mod tile;
 
 use tile::Tile;
-use super::super::common::Coords;
-use super::super::error::{Gremlin, GCODE};
+use crate::common::Coords;
+use crate::error::Gremlin;
 
 
 
@@ -38,7 +38,7 @@ impl Map {
             return Ok( (coords.x + coords.y * self.size) as Index )
         }
         
-        Err( Gremlin::new(GCODE::InvalidInput, None) )
+        Err( Gremlin::InvalidInput )
     }
 
     pub(super) fn idx_to_coords<T: Into<u8>>(&self, idx: T) -> Result<Coords, Gremlin> {
@@ -50,7 +50,7 @@ impl Map {
             return Ok( Coords::new(x, y) )
         }
         
-        Err( Gremlin::new(GCODE::InvalidInput, None) )
+        Err( Gremlin::InvalidInput )
     }
 }
 

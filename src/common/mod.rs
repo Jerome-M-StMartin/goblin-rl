@@ -8,8 +8,18 @@
 
 //pub mod command; This is useless with channels; how should it be, now?
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Message {
-    Temp,
+    HJKL(Dir),
+    WASD(Dir),
+    Cancel,
+    Confirm,
+    Tab,
+    BackTab,
+    Delete,
+    Menu,
+    Null,
+    Exit,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]

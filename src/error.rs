@@ -3,118 +3,55 @@
 
 use std::fmt;
 
+use crate::common::Message;
+
 //-------------------------------------------
 //------------ Custom Error Type ------------
 //-------------- & Error Codes --------------
 //-------------------------------------------
 
-pub struct Gremlin {
-    code: GCODE,
-    source: Option<std::io::Error>,
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub enum GCODE {
-    //Gremlin Identity Code
-    GW,
-    GUI,
-    Threading,
+#[derive(Debug)]
+pub enum Gremlin { //add variants as needed
+    //Internal Errors
     InvalidInput,
-    OutsideErr,
-    Undefined,
+    
+    //Outside Errors w/ Source Fields
+    IOError(std::io::Error),
+    SendError(std::sync::mpsc::SendError<Message>),
+    TryRecvErr(std::sync::mpsc::TryRecvError),
 }
 
-impl Gremlin {
-    pub fn new(code: GCODE, source: Option<std::io::Error>) -> Self {
-        Gremlin {
-            code,
-            source,
-        }
-    }
-}
-
-fn translate_code(code: GCODE) -> &'static str {
-    match code {
-        GCODE::GW => "eneral GameWorld error",
-        GCODE::GUI => "general GUI error",
-        GCODE::Threading => "multithreading error",
-        GCODE::InvalidInput => "fn input is invalid",
-
-        GCODE::OutsideErr => "outside error",
-        GCODE::Undefined => "undefined error",
-    }
-}
-
-impl fmt::Display for GCODE {
+impl fmt::Display for Gremlin {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", translate_code(*self))
-    }
-}
-
-impl<'a> fmt::Display for Gremlin {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let err_msg = translate_code(self.code);
-        write!(f, "{}", err_msg)
-    }
-}
-
-impl<'a> fmt::Debug for Gremlin {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}: {}", self.code, translate_code(self.code))
+        write!(f, "{:?}", self)
     }
 }
 
 impl<'a> std::error::Error for Gremlin {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        if let Some(source) = &self.source {
-            return Some(source);
+        match self {
+            Gremlin::IOError(source) => Some(source),
+            Gremlin::SendError(source) => Some(source),
+            Gremlin::TryRecvErr(source) => Some(source),
+            _ => { None },
         }
-        None
     }
 }
 
 impl<'a> From<std::io::Error> for Gremlin {
     fn from(item: std::io::Error) -> Self {
-        Gremlin {
-            code: GCODE::OutsideErr,
-            source: Some(item),
-        }
+        Gremlin::IOError(item)
     }
 }
 
-
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::fmt::Write as FmtWrite;
-
-    #[test]
-    fn test_0() {
-        let e = Gremlin {
-            code: GCODE::GW,
-            source: None,
-        };
-        assert!(format!("{}", e) == translate_code(GCODE::GW));
+impl<'a> From<std::sync::mpsc::SendError<Message>> for Gremlin {
+    fn from(item: std::sync::mpsc::SendError<Message>) -> Self {
+        Gremlin::SendError(item)
     }
+}
 
-    #[test]
-    fn test_1() {
-        let e = Gremlin {
-            code: GCODE::GUI,
-            source: None,
-        };
-        assert!(format!("{}", e) == translate_code(GCODE::GUI));
-    }
-
-    #[test]
-    fn test_2() {
-        let e = Gremlin {
-            code: GCODE::Threading,
-            source: None,
-        };
-        let mut buff = String::new();
-        write!(&mut buff, "{}: {}", e.code, translate_code(e.code)).unwrap();
-        assert!(format!("{:?}", e) == buff);
+impl<'a> From<std::sync::mpsc::TryRecvError> for Gremlin {
+    fn from(item: std::sync::mpsc::TryRecvError) -> Self {
+        Gremlin::TryRecvErr(item)
     }
 }

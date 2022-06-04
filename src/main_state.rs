@@ -3,13 +3,19 @@
 
 use std::any::Any;
 use std::thread::{JoinHandle, Thread};
-use std::sync::mpsc::Sender;
+use std::sync::mpsc::SyncSender;
 
 use specs::WorldExt; //specs lib docs say this should be imported over just World
 
-use super::user_input::UserInput;
-use super::common::Message;
+use crate::user_input::UserInput;
+use crate::common::Message;
+use crate::error::Gremlin;
 
+//-------------------------------------------
+//--------------- CONTROLLER ----------------
+//----------------- of MVC ------------------
+//-------------------------------------------
+//
 #[derive(Clone, Debug)]
 pub enum RunState {
     AwaitingInput{previous: Option<Box<RunState>>},
@@ -26,17 +32,16 @@ pub struct MainState {
     ecs: specs::World,
     game_world: JoinHandle<Thread>, //Game Simulation State
     gui: JoinHandle<Thread>, //GUI State
-    gui_tx: Sender<Message>,
-    gw_tx: Sender<Message>,
+    gui_tx: SyncSender<Message>,
+    gw_tx: SyncSender<Message>,
     runstate: RunState,
-    user_input: UserInput,
 }
 
 impl MainState {
     pub fn new(game_world: JoinHandle<Thread>,
                gui: JoinHandle<Thread>,
-               gui_tx: Sender<Message>,
-               gw_tx: Sender<Message>) -> MainState {
+               gui_tx: SyncSender<Message>,
+               gw_tx: SyncSender<Message>) -> MainState {
 
         MainState {
             ecs: specs::World::new(),
@@ -45,20 +50,27 @@ impl MainState {
             gui_tx,
             gw_tx,
             runstate: RunState::MainMenu,
-            user_input: UserInput::new(),
         }
     }
 
-    pub fn tick(&mut self) -> Result<(), super::error::Gremlin> {
+    pub fn tick(&mut self) -> Result<(), Gremlin> {
 
         //Has there been any user input?
-        self.user_input.tick()?;
-        
-        //user_input.event guaranteed to be None after this.
-        let input_event = self.user_input.take_input_event();
+        let user_input: Message = UserInput::blocking_read()?;
 
-        //println!("{:?}\r", input_event); //For User Input Testing Only
-        
+        //FOR TESTING ONLY - basically testing if I can cause the game to stop running correctly
+        //which partially tests user input. Need to further test user_input by sending messages
+        //recieved by TUI thread back to the main thread to be printed via {:?}
+        if user_input == Message::Cancel {
+            //TODO: Cause TUI thread to finish
+            //TODO: Cause GameWorld thread to finish
+            
+            //return any error to force main thread to call join_threads then exit()
+            return Err(Gremlin::InvalidInput)
+        }; 
+       
+        self.gui_tx.send(user_input)?;
+
         match &self.runstate {
             RunState::AwaitingInput { previous: _prev } => {},
             RunState::GameOver => {},

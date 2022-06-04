@@ -1,33 +1,91 @@
 //Jerome M. St.Martin
 //May, 2022
 
-use std::time::Duration;
 
-use crossterm::event::{poll, Event, KeyEvent, KeyCode, KeyModifiers};
+use crossterm::event::{Event, KeyCode};
 
-use super::error::Gremlin;
-
-//-------------------------------------------
-//--------------- CONTROLLER ----------------
-//----------------- of MVC ------------------
-//-------------------------------------------
+use crate::error::Gremlin;
+use crate::common::{Dir, Message};
 
 #[derive(Debug)]
-pub struct UserInput {
-    event: Option<Event>,
-}
+pub struct UserInput {}
 
 impl UserInput {
-    pub fn new() -> Self {
-        UserInput {
-            event: None,
-        }
+    pub(crate) fn blocking_read() -> Result<Message, Gremlin> {
+
+        let event = crossterm::event::read()?;
+        
+        //println!("{:?}\r", event); //For Testing Only
+
+        Ok(Self::translate(event))
     }
 
+    fn translate(event: Event) -> Message {
+        let mut msg = Message::Null;
+
+        match event {
+            Event::Key(key_event) => {
+                let code = key_event.code;
+                let _mods = key_event.modifiers; //No need at this time
+                match code {
+                    KeyCode::Backspace => { msg = Message::Delete },
+                    KeyCode::Enter => { msg = Message::Confirm },
+                    KeyCode::Left => { msg = Message::HJKL(Dir::W) },
+                    KeyCode::Right => { msg = Message::HJKL(Dir::E) },
+                    KeyCode::Up => { msg = Message::HJKL(Dir::N) },
+                    KeyCode::Down => { msg = Message::HJKL(Dir::S) },
+                    KeyCode::Home => {},
+                    KeyCode::End => {},
+                    KeyCode::PageUp => {},
+                    KeyCode::PageDown => {},
+                    KeyCode::Tab => { msg = Message::Tab },
+                    KeyCode::BackTab => { msg = Message::BackTab },
+                    KeyCode::Delete => { msg = Message::Delete },
+                    KeyCode::Insert => {},
+                    KeyCode::F(_) => { msg = Message::Menu },
+                    KeyCode::Char(c) => {
+                        match c {
+                            //WASD
+                            'w' => { msg = Message::WASD(Dir::N) },
+                            'e' => { msg = Message::WASD(Dir::NE) },
+                            'd' => { msg = Message::WASD(Dir::E) },
+                            'c' => { msg = Message::WASD(Dir::SE) },
+                            's' => { msg = Message::WASD(Dir::S) },
+                            'z' => { msg = Message::WASD(Dir::SW) },
+                            'a' => { msg = Message::WASD(Dir::W) },
+                            'q' => { msg = Message::WASD(Dir::NW) },
+                            
+                            //HJKL
+                            'h' => { msg = Message::HJKL(Dir::W) },
+                            'j' => { msg = Message::HJKL(Dir::S) },
+                            'k' => { msg = Message::HJKL(Dir::N) },
+                            'l' => { msg = Message::HJKL(Dir::E) },
+
+                            _ => {},
+                        }
+                    },
+                    KeyCode::Null => {},
+                    KeyCode::Esc => { msg = Message::Cancel; },
+                }
+            },
+            Event::Mouse(_mouse_event) => {}, //TODO
+            Event::Resize(_x, _y) => {}, //TODO
+        };
+
+        msg
+    }
+
+}
+
+
+
+
+    /*
+    use std::time::Duration;
     //Does Not Block (assuming it's correctly written)
     fn read_crossterm() -> std::io::Result<Event> {
 
-        if poll(Duration::from_millis(500))? { //TODO Confirm this duration is desireable. Try 0.
+        if crossterm::event::poll(Duration::from_millis(500))? {
             match crossterm::event::read()? {
                 event => return Ok(event),
             }
@@ -37,19 +95,13 @@ impl UserInput {
         Ok(Event::Key(KeyEvent::new(KeyCode::Null, KeyModifiers::NONE)))
     }
 
-    pub fn tick(&mut self) -> Result<(), Gremlin> {
-
-        let event = Self::read_crossterm()?;
+        //for tick():
         let non_event = Event::Key(KeyEvent::new(KeyCode::Null, KeyModifiers::NONE));
-
         if event == non_event {
             self.event = None;
         } else {
             self.event = Some(event);
         }
-        
-        Ok(())
-    }
 
     //This should never be called BEFORE self.tick() in any given frame.
     pub fn take_input_event(&mut self) -> Option<Event> {
@@ -58,14 +110,4 @@ impl UserInput {
         //in which case take() also returns None.
         self.event.take() 
     }
-}
-
-
-
-
-    /*fn blocking_read() -> crossterm::Result<Event> {
-        /*match read()? {
-            event => return Ok(event),
-        }*/
-        crossterm::event::read()
-    }*/
+    */
