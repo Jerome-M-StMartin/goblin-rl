@@ -10,7 +10,7 @@ specs = { version = "0.17.0", features = ["serde"] }
 specs-derive = "0.4.1"
 rand = "0.8.5"
 crossterm = "0.23.2"
-#serde = { version = "???", features = ["derive", "rc"] }
+serde = { version = "1.0", features = ["derive", "rc"] }
+serde_derive = "1.0"
 #serde_json = "???" 
-#serde_derive = "???"
 #lazy_static = "???"

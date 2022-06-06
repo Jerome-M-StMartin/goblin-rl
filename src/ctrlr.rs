@@ -2,20 +2,22 @@
 //May, 2022
 
 use std::any::Any;
-use std::thread::{JoinHandle, Thread};
+use std::thread::JoinHandle;
 use std::sync::mpsc::SyncSender;
 
 use specs::WorldExt; //specs lib docs say this should be imported over just World
 
 use crate::user_input::UserInput;
-use crate::common::{Message, Ticker};
+use crate::common::{InputEvent, Ticker};
 use crate::error::Gremlin;
 
 //-------------------------------------------
 //--------------- CONTROLLER ----------------
 //----------------- of MVC ------------------
 //-------------------------------------------
-//
+
+type ResTuple = (Result<(), Box<dyn Any + Send>>, Result<(), Box<dyn Any + Send>>);
+
 #[derive(Clone, Debug)]
 pub enum RunState {
     AwaitingInput{previous: Option<Box<RunState>>},
@@ -32,47 +34,34 @@ pub struct MainState {
     ecs: specs::World,
     game_world: JoinHandle<()>, //Game Simulation State
     tui: JoinHandle<()>, //GUI State
-    tui_tx: SyncSender<Message>,
-    gw_tx: SyncSender<Message>,
+    tui_tx: SyncSender<InputEvent>,
     runstate: RunState,
 }
 
 impl MainState {
     pub fn new(game_world: JoinHandle<()>,
                tui: JoinHandle<()>,
-               tui_tx: SyncSender<Message>,
-               gw_tx: SyncSender<Message>) -> MainState {
+               tui_tx: SyncSender<InputEvent>) -> MainState {
 
         MainState {
             ecs: specs::World::new(),
             game_world,
             tui,
             tui_tx,
-            gw_tx,
             runstate: RunState::MainMenu,
         }
     }
 
     pub fn tick(&mut self) -> Result<Ticker, Gremlin> {
 
-        //Has there been any user input?
-        println!("blocking read in ctrlr\r");
-        let user_input: Message = UserInput::blocking_read()?;
+        let user_input: InputEvent = UserInput::blocking_read()?;
 
-        //FOR TESTING ONLY - cause the game to stop running correctly
-        if user_input == Message::Exit {
-            println!("Exit branch reached!\r");
-            //Cause TUI thread to finish
-            self.tui_tx.send(Message::Exit)?;
-
-            //Cause GameWorld thread to finish
-            self.gw_tx.send(Message::Exit)?;
-            
-            //Finish this thread
+        if user_input == InputEvent::Exit { //Gracefully Exit Program
+            MainState::pre_exit(&self.tui_tx)?;
             return Ok(Ticker::ExitProgram)
         }; 
       
-        println!("send() called in ctrlr\r");
+        //Pass user input through to TUI thread
         self.tui_tx.send(user_input)?;
 
         match &self.runstate {
@@ -88,19 +77,18 @@ impl MainState {
 
         Ok(Ticker::Continue)
     }
-    
-    //Used to stop the two main threads upon Game Over or Game Close
-    pub fn join_threads(self) -> (Result<(), Box<dyn Any + Send>>, Result<(), Box<dyn Any + Send>>) {
-        //Returns two results.
-        let gw = match self.game_world.join() {
-            Ok(t) => Ok(t),
-            Err(e) => Err(e),
-        };
-        let tui = match self.tui.join() {
-            Ok(t) => Ok(t),
-            Err(e) => Err(e),
-        };
 
-        (gw, tui)
+    //Used to stop the two main threads upon Game Over or Game Close
+    pub(crate) fn join_threads(self) -> ResTuple {
+        //Returns two results.
+        (self.game_world.join(), self.tui.join())
+    }
+
+    fn pre_exit(tui_tx: &SyncSender<InputEvent>) -> Result<Ticker, Gremlin> {
+
+        //Tell TUI thread to finish
+        tui_tx.send(InputEvent::Exit)?;
+
+        Ok(Ticker::ExitProgram)
     }
 }

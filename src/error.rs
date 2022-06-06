@@ -3,7 +3,7 @@
 
 use std::fmt;
 
-use crate::common::Message;
+use super::common::{DeltaNotification, InputEvent, MutateCommand};
 
 //-------------------------------------------
 //------------ Custom Err Type ------------
@@ -17,7 +17,9 @@ pub enum Gremlin { //add variants as needed
     
     //Outside Errs w/ Source Fields
     IOErr(std::io::Error),
-    SendErr(std::sync::mpsc::SendError<Message>),
+    IESendErr(std::sync::mpsc::SendError<InputEvent>),
+    MCSendErr(std::sync::mpsc::SendError<MutateCommand>),
+    DNSendErr(std::sync::mpsc::SendError<DeltaNotification>),
     RecvErr(std::sync::mpsc::RecvError),
 }
 
@@ -31,7 +33,9 @@ impl<'a> std::error::Error for Gremlin {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
             Gremlin::IOErr(source) => Some(source),
-            Gremlin::SendErr(source) => Some(source),
+            Gremlin::IESendErr(source) => Some(source),
+            Gremlin::MCSendErr(source) => Some(source),
+            Gremlin::DNSendErr(source) => Some(source),
             Gremlin::RecvErr(source) => Some(source),
             _ => { None },
         }
@@ -44,9 +48,21 @@ impl<'a> From<std::io::Error> for Gremlin {
     }
 }
 
-impl<'a> From<std::sync::mpsc::SendError<Message>> for Gremlin {
-    fn from(item: std::sync::mpsc::SendError<Message>) -> Self {
-        Gremlin::SendErr(item)
+impl<'a> From<std::sync::mpsc::SendError<InputEvent>> for Gremlin {
+    fn from(item: std::sync::mpsc::SendError<InputEvent>) -> Self {
+        Gremlin::IESendErr(item)
+    }
+}
+
+impl<'a> From<std::sync::mpsc::SendError<MutateCommand>> for Gremlin {
+    fn from(item: std::sync::mpsc::SendError<MutateCommand>) -> Self {
+        Gremlin::MCSendErr(item)
+    }
+}
+
+impl<'a> From<std::sync::mpsc::SendError<DeltaNotification>> for Gremlin {
+    fn from(item: std::sync::mpsc::SendError<DeltaNotification>) -> Self {
+        Gremlin::DNSendErr(item)
     }
 }
 

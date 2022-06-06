@@ -50,25 +50,23 @@ classDiagram
             -fn systems()
         }
 
-    class View_GUI {
+    class View_TUI {
         -Widget[] widgets
 
         +draw_map(MapDrawable)
-        +draw_gui(GUI)
+        +draw_gui(TUI)
     }
 
 
 %% Relationships
 
 
-    %% Connected Across Thread Boundry
-    User <.. View_GUI
-    Model_GameWorld <..> View_GUI
-    Controller ..> Model_GameWorld
+    %% Connected Across Thread Boundry via Channels
+    Model_GameWorld <..> View_TUI
+    Controller ..> View_TUI
 
     %% A mutates B directly (most stuff mutates self based on input)
-    User --|> Crossterm
-    View_GUI --|> Crossterm
+    View_TUI --|> Crossterm
 
     %% A reads from B (no mutation)
     Crossterm --|> Controller
@@ -79,7 +77,7 @@ classDiagram
     Model_GameWorld --o ECS
 
     %% Threads
-    View_Thread -- View_GUI
+    View_Thread -- View_TUI
     Main --o Controller
     Main -- Model_Thread
     Main -- View_Thread

@@ -146,6 +146,8 @@ version = "0.2.0"
 dependencies = [
  "crossterm",
  "rand",
+ "serde",
+ "serde_derive",
  "specs",
  "specs-derive",
 ]

@@ -4,14 +4,14 @@
 
 use crossterm::event::{Event, KeyCode, KeyModifiers};
 
-use crate::error::Gremlin;
-use crate::common::{Dir, Message};
+use super::error::Gremlin;
+use super::common::{Dir, InputEvent};
 
 #[derive(Debug)]
 pub struct UserInput {}
 
 impl UserInput {
-    pub(crate) fn blocking_read() -> Result<Message, Gremlin> {
+    pub(crate) fn blocking_read() -> Result<InputEvent, Gremlin> {
 
         let event = crossterm::event::read()?;
         
@@ -20,58 +20,58 @@ impl UserInput {
         Ok(Self::translate(event))
     }
 
-    fn translate(event: Event) -> Message {
-        let mut msg = Message::Null;
+    fn translate(event: Event) -> InputEvent {
+        let mut msg = InputEvent::Null;
 
         match event {
             Event::Key(key_event) => {
                 let code = key_event.code;
                 let mods = key_event.modifiers; //No need at this time
                 match code {
-                    KeyCode::Backspace => { msg = Message::Delete },
-                    KeyCode::Enter => { msg = Message::Confirm },
-                    KeyCode::Left => { msg = Message::HJKL(Dir::W) },
-                    KeyCode::Right => { msg = Message::HJKL(Dir::E) },
-                    KeyCode::Up => { msg = Message::HJKL(Dir::N) },
-                    KeyCode::Down => { msg = Message::HJKL(Dir::S) },
+                    KeyCode::Backspace => { msg = InputEvent::Delete },
+                    KeyCode::Enter => { msg = InputEvent::Confirm },
+                    KeyCode::Left => { msg = InputEvent::HJKL(Dir::W) },
+                    KeyCode::Right => { msg = InputEvent::HJKL(Dir::E) },
+                    KeyCode::Up => { msg = InputEvent::HJKL(Dir::N) },
+                    KeyCode::Down => { msg = InputEvent::HJKL(Dir::S) },
                     KeyCode::Home => {},
                     KeyCode::End => {},
                     KeyCode::PageUp => {},
                     KeyCode::PageDown => {},
-                    KeyCode::Tab => { msg = Message::Tab },
-                    KeyCode::BackTab => { msg = Message::BackTab },
-                    KeyCode::Delete => { msg = Message::Delete },
+                    KeyCode::Tab => { msg = InputEvent::Tab },
+                    KeyCode::BackTab => { msg = InputEvent::BackTab },
+                    KeyCode::Delete => { msg = InputEvent::Delete },
                     KeyCode::Insert => {},
-                    KeyCode::F(_) => { msg = Message::Menu },
+                    KeyCode::F(_) => { msg = InputEvent::Menu },
                     KeyCode::Char(c) => {
                         match c {
                             //WASD
-                            'w' => { msg = Message::WASD(Dir::N) },
-                            'e' => { msg = Message::WASD(Dir::NE) },
-                            'd' => { msg = Message::WASD(Dir::E) },
-                            'c' => { msg = Message::WASD(Dir::SE) },
-                            's' => { msg = Message::WASD(Dir::S) },
-                            'z' => { msg = Message::WASD(Dir::SW) },
-                            'a' => { msg = Message::WASD(Dir::W) },
-                            'q' => { msg = Message::WASD(Dir::NW) },
+                            'w' => { msg = InputEvent::WASD(Dir::N) },
+                            'e' => { msg = InputEvent::WASD(Dir::NE) },
+                            'd' => { msg = InputEvent::WASD(Dir::E) },
+                            'c' => { msg = InputEvent::WASD(Dir::SE) },
+                            's' => { msg = InputEvent::WASD(Dir::S) },
+                            'z' => { msg = InputEvent::WASD(Dir::SW) },
+                            'a' => { msg = InputEvent::WASD(Dir::W) },
+                            'q' => { msg = InputEvent::WASD(Dir::NW) },
                             
                             //HJKL
-                            'h' => { msg = Message::HJKL(Dir::W) },
-                            'j' => { msg = Message::HJKL(Dir::S) },
-                            'k' => { msg = Message::HJKL(Dir::N) },
-                            'l' => { msg = Message::HJKL(Dir::E) },
+                            'h' => { msg = InputEvent::HJKL(Dir::W) },
+                            'j' => { msg = InputEvent::HJKL(Dir::S) },
+                            'k' => { msg = InputEvent::HJKL(Dir::N) },
+                            'l' => { msg = InputEvent::HJKL(Dir::E) },
 
                             _ => {},
                         }
                     },
                     KeyCode::Null => {},
-                    KeyCode::Esc => { msg = Message::Cancel; },
+                    KeyCode::Esc => { msg = InputEvent::Cancel; },
                 }
 
                 match mods {
                     KeyModifiers::SHIFT => {},
                     KeyModifiers::CONTROL => {
-                        if code == KeyCode::Char('c') { msg = Message::Exit; }
+                        if code == KeyCode::Char('c') { msg = InputEvent::Exit; }
                     },
                     KeyModifiers::ALT => {},
                     KeyModifiers::NONE => {},
