@@ -1,11 +1,6 @@
 //Jerome M. St.Martin
 //May, 2022
 
-/*
- * PURPOSE:
- * Structs and modules shared between both GUI and GameWorld threads.
- */
-
 use specs::Entity;
 
 use usize as Index; //Type Alias

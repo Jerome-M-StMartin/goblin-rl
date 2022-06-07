@@ -5,52 +5,63 @@ use std::collections::HashMap;
 
 use specs::Entity;
 
-use super::super::common::Coords;
-use super::super::error::Gremlin;
+use crate::common::Coords;
+use crate::error::Gremlin;
+
+pub mod precon;
+mod map_builder;
 
 //-----------------------------------------------------------------------------
-//------------------------------ Game Map -------------------------------------
-//------------------------------- Builder -------------------------------------
+//--------------------------- Game World Map ----------------------------------
 //-----------------------------------------------------------------------------
 
 /* Abstract Tiles:
  * Each tile is represented by an Index,
  * which is used as a universal key into
  * the fields of the Map struct which
- * comprise the features of each tile.
+ * describe aspects of the map, and of
+ * each tile in it.
  */
 
-use usize as Index; //Type Alias
+// Type Aliasing
+use usize as Index;
 
-pub(super) struct Map {
+pub struct Map {
     dirty_flag: bool,
     size: u16,
-    walls: Vec<bool>,
-    blocked: Vec<bool>, //Walkable/NonWalkable
+    player_spawnpoint: Index,
+    walls: Vec<bool>, //Must be initialized to have size^2 elements.
+    blocked: Vec<bool>, //Must be initialized to have size^2 elements.
     tile_contents: HashMap<Index, [Entity; 8]>,
 }
 
 impl Map {
-    pub(super) fn new<T: Into<u16>>(size: T) -> Self
+
+    pub fn builder() -> map_builder::MapBuilder {
+        map_builder::MapBuilder::new()
+    }
+
+    pub fn new<T: Into<u16> + Copy>(size: T) -> Self
     {
         Map {
             dirty_flag: false,
             size: size.into(),
-            walls: vec![false],
-            blocked: vec![false],
+            player_spawnpoint: 11,
+            walls: vec![false; size.into().pow(2) as usize],
+            blocked: vec![false; size.into().pow(2) as usize],
             tile_contents: HashMap::new(),
         }
     }
 
-    pub(super) fn is_dirty(&self) -> bool {
+    pub fn is_dirty(&self) -> bool {
         self.dirty_flag
     }
 
-    pub(super) fn clean(&mut self) {
+    pub fn clean(&mut self) {
         self.dirty_flag = false;
     }
 
-    pub(super) fn coords_to_idx(&self, coords: Coords) -> Result<Index, Gremlin> {
+    pub fn coords_to_idx(&self, coords: Coords) -> Result<Index, Gremlin> {
         if coords.x < self.size && coords.y < self.size {
             return Ok( (coords.x + coords.y * self.size) as Index )
         }
@@ -58,12 +69,13 @@ impl Map {
         Err( Gremlin::InvalidInput )
     }
 
-    pub(super) fn idx_to_coords<T: Into<u16>>(&self, idx: T) -> Result<Coords, Gremlin> {
+    pub fn idx_to_coords<T: Into<u32>>(&self, idx: T) -> Result<Coords, Gremlin> {
         let idx = idx.into();
+        let size = self.size as u32;
 
-        if idx < self.size.pow(2) {
-            let x = idx % self.size;
-            let y = idx / self.size;
+        if idx < size.pow(2) {
+            let x = (idx % size) as u16;
+            let y = (idx / size) as u16;
             return Ok( Coords::new(x, y) )
         }
         

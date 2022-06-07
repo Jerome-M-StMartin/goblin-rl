@@ -3,50 +3,54 @@
 
 use std::sync::mpsc::{Receiver, SyncSender};
 
+use specs::WorldExt; //specs lib docs say this should be imported over just World
+
 use crate::common::{MutateCommand, DeltaNotification, Ticker};
 use crate::error::Gremlin;
 
-mod map;
+//ECS Modules
+mod components;
+mod resources;
+mod systems;
 
 pub struct GameWorld {
     channel: (Receiver<MutateCommand>, SyncSender<DeltaNotification>),
-    map: map::Map,
+    ecs: specs::World,
 }
 
 impl GameWorld {
-    pub fn new(rx: Receiver<MutateCommand>,
-               tx: SyncSender<DeltaNotification>,
-               map_size: u16) -> Self {
+    pub fn new(map_size: u16, 
+               rx: Receiver<MutateCommand>,
+               tx: SyncSender<DeltaNotification>) -> Self {
+        
+        //---Map Initialization---
+        let map = resources::map::Map::builder()
+            .with_precon_layout(resources::map::precon::empty_10x10())
+            .build();
 
+        //---ECS Initialization---
+        let mut ecs_world: specs::World = WorldExt::new();
+        // Insert all resources:
+        ecs_world.insert(map); //The Game World map resource
+        components::register_all_components(&mut ecs_world); //self-explanatory
+
+        //---Construct the obj---
         GameWorld {
             channel: (rx, tx),
-            map: map::Map::new(map_size),
+            ecs: ecs_world,
         }
     }
 
     pub fn tick(&mut self) -> Result<Ticker, Gremlin> {
 
         //println!("GW thread calling recv()...\r");
-        let message = self.channel.0.recv()?;
-        if message == MutateCommand::Exit { return Ok(Ticker::ExitProgram) };
-       // println!("{:?}\r", message); //FOR TESTING ONLY
+        let cmd = self.channel.0.recv()?;
+        if cmd == MutateCommand::Exit { return Ok(Ticker::ExitProgram) };
+       // println!("{:?}\r", cmd); //FOR TESTING ONLY
 
-        //TODO: Process Message
+        //TODO: Process MutateCommand
         
-        self.map_delta_check();
-
         Ok(Ticker::Continue)
-    }
-
-    //Check the dirty flag of self.map, if there's been a delta then
-    //send a Message to the TUI notifying of the change, including
-    //the data necessary for the TUI to mutate its representation
-    //of the map (a Vec of Glyphs, probably).
-    fn map_delta_check(&mut self) {
-        if self.map.is_dirty() {
-            //TODO: Send Message::DirtyMap(DeltaData) to TUI
-            self.map.clean();
-        }
     }
 }
 

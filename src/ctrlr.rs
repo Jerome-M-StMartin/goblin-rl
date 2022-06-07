@@ -5,8 +5,6 @@ use std::any::Any;
 use std::thread::JoinHandle;
 use std::sync::mpsc::SyncSender;
 
-use specs::WorldExt; //specs lib docs say this should be imported over just World
-
 use crate::user_input::UserInput;
 use crate::common::{InputEvent, Ticker};
 use crate::error::Gremlin;
@@ -31,7 +29,6 @@ pub enum RunState {
 }
 
 pub struct MainState {
-    ecs: specs::World,
     game_world: JoinHandle<()>, //Game Simulation State
     tui: JoinHandle<()>, //GUI State
     tui_tx: SyncSender<InputEvent>,
@@ -44,7 +41,6 @@ impl MainState {
                tui_tx: SyncSender<InputEvent>) -> MainState {
 
         MainState {
-            ecs: specs::World::new(),
             game_world,
             tui,
             tui_tx,
