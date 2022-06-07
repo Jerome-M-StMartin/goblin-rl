@@ -10,6 +10,7 @@ mod gameworld;
 mod tui;
 mod ctrlr;
 mod user_input;
+mod ecs_access_point;
 
 const MAP_SIZE: u16 = 10;
 
@@ -65,7 +66,7 @@ fn main() {
      *      will get a panic."
      *
      *      Therefor, I need to create a struct, say... an ECSHandle, which acts as a guard
-     *      over the ECS types that allow storage access (ReadStorage, WriteStorage, etc).
+     *      over the ECS types which allow storage access (ReadStorage, WriteStorage, etc).
      *      Both View and Model threads will hold an Arc<ECSHandle>. The ECSHandle will
      *      handle the logic for guaranteeing that only one Write or only Reads occur at
      *      any one time for any specific Storage. Right now, I'm thinking it'll just create
@@ -76,7 +77,28 @@ fn main() {
      *      fun project; I'll have to learn how to properly block a thread without spinning.
      *      Maybe thread::yield? I think I recently read in Jon G.'s book that yielding is
      *      not ideal, so I'll have to look into that.
-    */ 
+     *
+     *      Solution Continued (again): Performant alternative to yield = Condvar + Mutex.
+     *      Here's the plan! (Very happy to figure this out before I have to be away from
+     *      my dev environment for ~24hrs. :] Not sarcasm! When I get back it'll be clear
+     *      exactly what my next step forward is to be, and that feels AMAZING, as other
+     *      software devs will appreciate, I am sure. Anyway...
+     *      The solution is: Impl a pure public fn on Arc<ECSHandle>, blocking_fetch(storage),
+     *      which DYNAMICALLY creates a (Mutex<bool>, Condvar) tuple to guard access to
+     *      that specific storage. Actually, instead of blocking_fetch(...) I'll do
+     *      write_fetch(...) and read_fetch(...), but I digress.
+     *      The Mutex/Condvar tuple will be accessed/stored via Rust's Entry API, such that
+     *      there will only ever be 0..1 tuples instantiated for any given Read or Write
+     *      to any given Storage. The collection of currently existing Write tuples will
+     *      always be checked first, even for read_fetch(). If that's all-clear, then the
+     *      Read tuple collection will be checked. In this way, an existing Read will
+     *      allow other Reads without blocking, but any existing Write will have guaranteed
+     *      exclusive access to a single specific storage for the duration of the Write access.
+     *
+     *      Woo! I hope this concept implements as well as it was designed. :] :) :}
+     *
+     *      Also, changing "ECSHandle" to ECSAccessPoint, which is more sensical imo.
+    */      
 
     //Channel endpoint names are derived from the enums they send/recv.
     let (mutate_tx, mutate_rx) = mpsc::sync_channel(1); // View --> Model
