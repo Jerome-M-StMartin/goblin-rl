@@ -1,6 +1,13 @@
 //Jerome M. St.Martin
 //June 8, 2022
 
+
+
+
+//DEPRECATED: Now is AccessorGuard in mod root - can delete this
+
+
+
 //-----------------------------------------------------------------------------
 //---------------------- Return Type for Storage Accessor ---------------------
 //-----------------------------------------------------------------------------
@@ -28,10 +35,4 @@ impl<'a, T: specs::Component> StorageGuard<'a, T> {
     }
 }
 
-impl<'a, T: specs::Component> Drop for StorageGuard<'a, T> {
-    fn drop(&mut self) {/*
-        let mut access_allowed = self.mtx.lock().expect("StorageGuard Mutex poisoned before .drop()");
-        *access_allowed = true;
-        self.cvar.notify_all();*/
-    }
-}
+//impl<'a, T: specs::Component> Drop for StorageGuard<'a, T> {}
