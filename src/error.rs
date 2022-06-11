@@ -11,10 +11,11 @@ use super::common::{DeltaNotification, InputEvent, MutateCommand};
 //-------------------------------------------
 
 #[derive(Debug)]
-pub enum Gremlin { //add variants as needed
+pub enum Gremlin {
+    //add variants as needed
     //Internal Errs
     InvalidInput,
-    
+
     //Outside Errs w/ Source Fields
     IOErr(std::io::Error),
     IESendErr(std::sync::mpsc::SendError<InputEvent>),
@@ -37,7 +38,7 @@ impl<'a> std::error::Error for Gremlin {
             Gremlin::MCSendErr(source) => Some(source),
             Gremlin::DNSendErr(source) => Some(source),
             Gremlin::RecvErr(source) => Some(source),
-            _ => { None },
+            _ => None,
         }
     }
 }

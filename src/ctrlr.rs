@@ -2,23 +2,26 @@
 //May, 2022
 
 use std::any::Any;
-use std::thread::JoinHandle;
 use std::sync::mpsc::SyncSender;
+use std::thread::JoinHandle;
 
-use crate::user_input::UserInput;
 use crate::common::{InputEvent, Ticker};
 use crate::error::Gremlin;
+use crate::user_input::UserInput;
 
 //-------------------------------------------
 //--------------- CONTROLLER ----------------
 //----------------- of MVC ------------------
 //-------------------------------------------
 
-type ResTuple = (Result<(), Box<dyn Any + Send>>, Result<(), Box<dyn Any + Send>>);
+type ResTuple = (
+    Result<(), Box<dyn Any + Send>>,
+    Result<(), Box<dyn Any + Send>>,
+);
 
 #[derive(Clone, Debug)]
 pub enum RunState {
-    AwaitingInput{previous: Option<Box<RunState>>},
+    AwaitingInput { previous: Box<RunState> },
     GameOver,
     GameWorld,
     GUI,
@@ -30,16 +33,17 @@ pub enum RunState {
 
 pub struct MainState {
     game_world: JoinHandle<()>, //Game Simulation State
-    tui: JoinHandle<()>, //GUI State
+    tui: JoinHandle<()>,        //GUI State
     tui_tx: SyncSender<InputEvent>,
     runstate: RunState,
 }
 
 impl MainState {
-    pub fn new(game_world: JoinHandle<()>,
-               tui: JoinHandle<()>,
-               tui_tx: SyncSender<InputEvent>) -> MainState {
-
+    pub fn new(
+        game_world: JoinHandle<()>,
+        tui: JoinHandle<()>,
+        tui_tx: SyncSender<InputEvent>,
+    ) -> MainState {
         MainState {
             game_world,
             tui,
@@ -49,26 +53,26 @@ impl MainState {
     }
 
     pub fn tick(&mut self) -> Result<Ticker, Gremlin> {
-
         let user_input: InputEvent = UserInput::blocking_read()?;
 
-        if user_input == InputEvent::Exit { //Gracefully Exit Program
+        if user_input == InputEvent::Exit {
+            //Gracefully Exit Program
             MainState::pre_exit(&self.tui_tx)?;
-            return Ok(Ticker::ExitProgram)
-        }; 
-      
+            return Ok(Ticker::ExitProgram);
+        };
+
         //Pass user input through to TUI thread
         self.tui_tx.send(user_input)?;
 
         match &self.runstate {
-            RunState::AwaitingInput { previous: _prev } => {},
-            RunState::GameOver => {},
-            RunState::GameWorld => {},
-            RunState::GUI => {},
-            RunState::MainMenu => {},
-            RunState::MapGeneration => {},
-            RunState::NextLevel => {},
-            RunState::PreRun => {},
+            RunState::AwaitingInput { previous: _prev } => {}
+            RunState::GameOver => {}
+            RunState::GameWorld => {}
+            RunState::GUI => {}
+            RunState::MainMenu => {}
+            RunState::MapGeneration => {}
+            RunState::NextLevel => {}
+            RunState::PreRun => {}
         }
 
         Ok(Ticker::Continue)
@@ -81,7 +85,6 @@ impl MainState {
     }
 
     fn pre_exit(tui_tx: &SyncSender<InputEvent>) -> Result<Ticker, Gremlin> {
-
         //Tell TUI thread to finish
         tui_tx.send(InputEvent::Exit)?;
 
