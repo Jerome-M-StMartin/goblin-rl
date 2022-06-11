@@ -5,13 +5,7 @@
 //--------------------- Things that Get Sent via Channels ---------------------
 //-----------------------------------------------------------------------------
 
-use specs::Entity;
-
-use crate::ecs_access_point::AccessKey;
-
 use super::Dir;
-
-use usize as Index; //Type Alias
 
 //---------------------- Controller -> View ----------------------
 ///Commands passed from Controller to View (in MVC) via mpsc::channels.
@@ -36,23 +30,7 @@ pub enum InputEvent {
 #[derive(PartialEq, Eq, Debug)]
 pub enum MutateCommand {
     Test,
-    InsertMarkerComponent(Box<InsertionData>),
-    Map(Box<MapMutation>),
     Exit,
-}
-
-#[derive(PartialEq, Eq, Debug)]
-pub struct InsertionData {
-    key: AccessKey,
-    target: Entity,
-}
-
-///The inner value for MutateCommand variant "Map".
-#[derive(PartialEq, Eq, Debug)]
-pub struct MapMutation {
-    idx: Index,
-    add: Option<Entity>,
-    rm: Option<Entity>,
 }
 //------------------------ ------------- ------------------------
 
@@ -61,13 +39,7 @@ pub struct MapMutation {
 ///i.e. The Model telling the View: "Here's what changed in the Game World".
 #[derive(PartialEq, Eq, Debug)]
 pub enum DeltaNotification {
-    Map(Box<MapDelta>),
+    MapDirty,
 }
 
-///The inner value for DeltaNotification variant "Map".
-#[derive(PartialEq, Eq, Debug)]
-pub struct MapDelta {
-    idx: Vec<Index>,
-    current_content: Vec<[Entity; 8]>,
-}
 //------------------------ ------------- ------------------------

@@ -10,36 +10,14 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Condvar, Mutex};
 
+use specs::{error::Error, Component, Entity, World};
+
+use crate::error::Gremlin;
+
 mod storage_access_guard;
 
 pub use storage_access_guard::StorageAccessGuard;
 
-/*
-//Marker Structs to hold Component Types for use in AccessKey variants.
-#[derive(PartialEq, Eq, Hash, Debug)]
-pub struct TypeMarker<T> {
-    _phantom: PhantomData<T>,
-}
-
-impl<T> TypeMarker<T> {
-    pub fn new() -> Self {
-        TypeMarker {
-            _phantom: PhantomData::<T>,
-        }
-    }
-}*/
-
-//Each variant REPRESENTS the type of the Storage which access is being saught for.
-//The type of the Storage corresponds to the Type of the Component it stores.
-//It is up to me, the programmer, to account for that representation, because
-//I cannot for the life of me figure out how to work it into Rust's type system,
-//primarily because the AccessGuards live in collections and the collections live
-//in a NON-generic struct (ECSAccessPoint). If I explicitly put a generic type on
-//the AccessGuard, that means I have to explicitly generically type the collections
-//they live in, and that means I have to explicitly generically type the ECSAccessPoint,
-//but... that breaks the whole point, which is that there is only one, non-generic,
-//ECSAccessPoint in which all AccessGuards live, regardless of the type of storage
-//they guard.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum AccessKey {
     TestComponent,
@@ -47,27 +25,40 @@ pub enum AccessKey {
 }
 
 pub struct ECSAccessPoint {
-    accessors: HashMap<AccessKey, Arc<AccessGuard>>,
-    ecs: specs::World,
+    accessors: Mutex<HashMap<AccessKey, Arc<AccessGuard>>>,
+    ecs: World,
 }
 
 impl ECSAccessPoint {
     pub fn new(ecs: specs::World) -> Self {
         ECSAccessPoint {
-            accessors: HashMap::new(),
+            accessors: Mutex::new(HashMap::new()),
             ecs,
         }
     }
 
-    pub fn req_access(&mut self, key: AccessKey) -> Arc<AccessGuard> {
-        if !self.accessors.contains_key(&key) {
-            self.accessors.insert(key, Arc::new(AccessGuard::new()));
-        }
-        self.accessors.get(&key).unwrap().clone()
+    pub fn insert_component<T: Component>(
+        &self,
+        key: AccessKey,
+        c: T,
+        e: Entity,
+    ) -> Result<Option<T>, specs::error::Error> {
+        self.req_access(key)
+            .write_storage::<T>(&self.ecs)
+            .insert(e, c)
     }
 
-    pub fn borrow_ecs(&self) -> &specs::World {
-        &self.ecs
+    fn req_access(&self, key: AccessKey) -> Arc<AccessGuard> {
+        let mut accessors = self
+            .accessors
+            .lock()
+            .expect("Mutex found to be poisoned during ecs_ap.req_access()");
+
+        if !accessors.contains_key(&key) {
+            accessors.insert(key, Arc::new(AccessGuard::new()));
+        }
+
+        accessors.get(&key).unwrap().clone()
     }
 }
 
@@ -84,7 +75,6 @@ struct Access {
 pub struct AccessGuard {
     mtx: Mutex<Access>,
     cvar: Condvar,
-    //_phantom: PhantomData<T>,
 }
 
 impl AccessGuard {
@@ -96,7 +86,6 @@ impl AccessGuard {
                 write_allowed: true,
             }),
             cvar: Condvar::new(),
-            //_phantom: PhantomData::<T>,
         }
     }
 }

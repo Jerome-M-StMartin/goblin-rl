@@ -8,7 +8,7 @@
 use specs::prelude::*;
 use specs_derive::Component;
 
-pub(super) fn register_all_components(w: &mut specs::World) {
+pub(crate) fn register_all_components(w: &mut specs::World) {
     w.register::<TestComponent>();
 }
 

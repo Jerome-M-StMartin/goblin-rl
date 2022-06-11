@@ -1,12 +1,13 @@
 //Jerome M. St.Martin
 //May, 2022
 
-use std::sync::mpsc::{Receiver, SyncSender};
+use std::sync::{
+    mpsc::{Receiver, SyncSender},
+    Arc,
+};
 
-use specs::Entity;
-
-use crate::common::{DeltaNotification, InputEvent, InsertionData, MutateCommand, Ticker};
-use crate::ecs_access_point::AccessKey;
+use crate::common::{DeltaNotification, InputEvent, MutateCommand, Ticker};
+use crate::ecs_access_point::ECSAccessPoint;
 use crate::error::Gremlin;
 
 mod observer;
@@ -14,6 +15,7 @@ mod observer;
 pub struct TUIState {
     ctrlr_channel: Receiver<InputEvent>,
     model_channel: (Receiver<DeltaNotification>, SyncSender<MutateCommand>),
+    ecs_ap: Arc<ECSAccessPoint>,
 }
 
 impl TUIState {
@@ -21,10 +23,12 @@ impl TUIState {
         ctrlr_rx: Receiver<InputEvent>,
         model_rx: Receiver<DeltaNotification>,
         model_tx: SyncSender<MutateCommand>,
+        ecs_ap: Arc<ECSAccessPoint>,
     ) -> Self {
         TUIState {
             ctrlr_channel: (ctrlr_rx),
             model_channel: (model_rx, model_tx),
+            ecs_ap,
         }
     }
 

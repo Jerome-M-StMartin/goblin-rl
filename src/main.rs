@@ -1,21 +1,25 @@
 //Jerome M. St.Martin
 //May, 2022
 
+use std::sync::{mpsc, Arc};
 use std::thread;
-use std::sync::mpsc;
+
+use specs::WorldExt;
 
 mod common;
+mod ctrlr;
+mod ecs_access_point;
 mod error;
 mod gameworld;
 mod tui;
-mod ctrlr;
 mod user_input;
-mod ecs_access_point;
+
+use ecs_access_point::ECSAccessPoint;
+use gameworld::{components, resources::map};
 
 const MAP_SIZE: u16 = 10;
 
 fn main() {
-
     /* Control Flow:
      * 1.) The User gives input which is sent from Controller to View.
      * 2.) Based on the User's input and the context of its state, the View either:
@@ -33,7 +37,7 @@ fn main() {
      * to handle, which is why the View must wait to receive a DeltaNotification detailing the
      * entire chain, so it (the View) knows how to mutate itself to reflect these changes to
      * the GameWorld, and in turn shows the User the effect if their input.
-     *
+     *gameworld::
      * Problem: Multiple Sources of Truth == High Maintenance Reqs.
      *      This forces the View to keep its own stateful representation of things
      *      which are already statefully represented in the Model, meaning that
@@ -41,7 +45,7 @@ fn main() {
      *      This will be annoying, tedious, and error-prone; or so it seems currently.
      *      The benefit to this way of doing things is that there is no shared state
      *      between the View and Model threads, which is... pretty nice.
-     * 
+     *
      * Possible Solution: SPECS Storages as Shared State
      *      Assuming Storages can be placed in RwLocks (preferred to Mutex, though at first
      *      I thought the opposite; explanation below), doing so allows both View and Model
@@ -98,7 +102,21 @@ fn main() {
      *      Woo! I hope this concept implements as well as it was designed. :] :) :}
      *
      *      Also, changing "ECSHandle" to ECSAccessPoint, which is more sensical imo.
-    */      
+     */
+
+    // Map Initialization
+    let map = map::Map::builder()
+        .with_precon_layout(map::precon::empty_10x10())
+        .build();
+
+    // ECS Initialization
+    let mut ecs_world: specs::World = WorldExt::new();
+    ecs_world.insert(map);
+    components::register_all_components(&mut ecs_world);
+
+    let ecs_ap = Arc::new(ECSAccessPoint::new(ecs_world));
+    let gw_ecs_ap = ecs_ap.clone();
+    let tui_ecs_ap = ecs_ap.clone();
 
     //Channel endpoint names are derived from the enums they send/recv.
     let (mutate_tx, mutate_rx) = mpsc::sync_channel(1); // View --> Model
@@ -111,23 +129,21 @@ fn main() {
      */
     // Init & Spawn the GameWorld thread
     let gw_thread = thread::spawn(move || {
-
-        let mut gw = gameworld::GameWorld::new(MAP_SIZE, mutate_rx, delta_tx);
+        let mut gw = gameworld::GameWorld::new(MAP_SIZE, mutate_rx, delta_tx, gw_ecs_ap);
 
         loop {
             match gw.tick() {
-                Ok(ticker) => {
-                    match ticker {
-                        common::Ticker::ExitProgram => { break; },
-                        common::Ticker::Continue => {},
+                Ok(ticker) => match ticker {
+                    common::Ticker::ExitProgram => {
+                        break;
                     }
+                    common::Ticker::Continue => {}
                 },
                 Err(e) => {
                     println!("{}", e);
-                },   
+                }
             };
         }
-
     });
 
     /* ---------------------------
@@ -136,23 +152,21 @@ fn main() {
      */
     // Init & Spawn the TUI thread
     let tui_thread = thread::spawn(move || {
-
-        let mut tui = tui::TUIState::new(ui_rx, delta_rx, mutate_tx);
+        let mut tui = tui::TUIState::new(ui_rx, delta_rx, mutate_tx, tui_ecs_ap);
 
         loop {
             match tui.tick() {
-                Ok(ticker) => {
-                    match ticker {
-                        common::Ticker::ExitProgram => { break; },
-                        common::Ticker::Continue => {},
+                Ok(ticker) => match ticker {
+                    common::Ticker::ExitProgram => {
+                        break;
                     }
+                    common::Ticker::Continue => {}
                 },
                 Err(e) => {
                     println!("{}", e);
-                },   
+                }
             };
         }
-
     });
 
     /* ---------------------------
@@ -164,19 +178,19 @@ fn main() {
     crossterm::terminal::enable_raw_mode().unwrap(); //panics on failure, which is desired
 
     // Store JoinHandles on tui & gameworld threads in GameState struct
-    let mut gs = ctrlr::MainState::new(gw_thread, tui_thread, ui_tx);
+    let mut gs = ctrlr::MainState::new(gw_thread, tui_thread, ui_tx, ecs_ap);
 
-    loop { 
+    loop {
         match gs.tick() {
-            Ok(ticker) => {
-                match ticker {
-                    common::Ticker::ExitProgram => { break; },
-                    common::Ticker::Continue => {},
+            Ok(ticker) => match ticker {
+                common::Ticker::ExitProgram => {
+                    break;
                 }
+                common::Ticker::Continue => {}
             },
             Err(e) => {
                 println!("{}", e);
-            },
+            }
         };
     }
 
@@ -187,4 +201,3 @@ fn main() {
     crossterm::terminal::disable_raw_mode().unwrap();
     std::process::exit(0);
 }
-

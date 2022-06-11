@@ -13,8 +13,6 @@ use specs::{
 use super::{Access, AccessGuard};
 
 pub trait StorageAccessGuard<'a> {
-    //type T: 'a + Component; //T impls Component trait
-
     fn read_storage<T: Component>(&self, ecs: &'a specs::World) -> ReadStorage<'a, T>;
     fn write_storage<T: Component>(&self, ecs: &'a specs::World) -> WriteStorage<'a, T>;
 }

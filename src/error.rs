@@ -22,6 +22,7 @@ pub enum Gremlin {
     MCSendErr(std::sync::mpsc::SendError<MutateCommand>),
     DNSendErr(std::sync::mpsc::SendError<DeltaNotification>),
     RecvErr(std::sync::mpsc::RecvError),
+    SpecsErr(specs::error::Error),
 }
 
 impl fmt::Display for Gremlin {
@@ -38,6 +39,7 @@ impl<'a> std::error::Error for Gremlin {
             Gremlin::MCSendErr(source) => Some(source),
             Gremlin::DNSendErr(source) => Some(source),
             Gremlin::RecvErr(source) => Some(source),
+            Gremlin::SpecsErr(source) => Some(source),
             _ => None,
         }
     }
@@ -70,5 +72,11 @@ impl<'a> From<std::sync::mpsc::SendError<DeltaNotification>> for Gremlin {
 impl<'a> From<std::sync::mpsc::RecvError> for Gremlin {
     fn from(item: std::sync::mpsc::RecvError) -> Self {
         Gremlin::RecvErr(item)
+    }
+}
+
+impl<'a> From<specs::error::Error> for Gremlin {
+    fn from(item: specs::error::Error) -> Self {
+        Gremlin::SpecsErr(item)
     }
 }

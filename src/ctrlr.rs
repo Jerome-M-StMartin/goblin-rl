@@ -2,10 +2,11 @@
 //May, 2022
 
 use std::any::Any;
-use std::sync::mpsc::SyncSender;
+use std::sync::{mpsc::SyncSender, Arc};
 use std::thread::JoinHandle;
 
 use crate::common::{InputEvent, Ticker};
+use crate::ecs_access_point::ECSAccessPoint;
 use crate::error::Gremlin;
 use crate::user_input::UserInput;
 
@@ -35,6 +36,7 @@ pub struct MainState {
     game_world: JoinHandle<()>, //Game Simulation State
     tui: JoinHandle<()>,        //GUI State
     tui_tx: SyncSender<InputEvent>,
+    ecs_ap: Arc<ECSAccessPoint>,
     runstate: RunState,
 }
 
@@ -43,11 +45,13 @@ impl MainState {
         game_world: JoinHandle<()>,
         tui: JoinHandle<()>,
         tui_tx: SyncSender<InputEvent>,
+        ecs_ap: Arc<ECSAccessPoint>,
     ) -> MainState {
         MainState {
             game_world,
             tui,
             tui_tx,
+            ecs_ap: ecs_ap,
             runstate: RunState::MainMenu,
         }
     }
