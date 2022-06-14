@@ -8,7 +8,6 @@
 use super::Map;
 use super::precon::*;
 
-//Fields are instructions to build a Map struct.
 pub struct MapBuilder {
     size: Option<u16>,
     layout: Option<&'static str>,
@@ -27,12 +26,12 @@ impl MapBuilder {
         self.size = Some(precon.size);
         self
     }
-
+/*
     pub fn with_procgen_layout(mut self) -> Self {
         //TODO
         self
     }
-
+*/
     pub fn build(self) -> Map {
         let mut map = Map::new(self.size.unwrap());
         
@@ -47,7 +46,7 @@ impl MapBuilder {
                     map.player_spawnpoint = idx;
                     map.blocked[idx] = true;
                 },
-                _ => { println!("c: {}\r", c); },
+                _ => { println!("Unexpected Char: {}\r", c); },
             }
         }
 

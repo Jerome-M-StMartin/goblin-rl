@@ -30,7 +30,7 @@ fn main() {
     let gw_ecs_ap = ecs_ap.clone();
     let tui_ecs_ap = ecs_ap.clone();
 
-    //Channel endpoint names are derived from the enums they send/recv.
+    //Channel Initialization, endpoint names derived from the enums they send/recv.
     let (mutate_tx, mutate_rx) = mpsc::sync_channel(1); // View --> Model
     let (delta_tx, delta_rx) = mpsc::sync_channel(1); // Model --> View
     let (ui_tx, ui_rx) = mpsc::sync_channel(1); // Controller -> View

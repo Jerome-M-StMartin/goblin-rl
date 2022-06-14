@@ -18,6 +18,11 @@ mod resource_access_guard;
 pub use storage_access_guard::StorageAccessGuard;
 pub use resource_access_guard::ResourceAccessGuard;
 
+//FOR TESTING ----------
+use crate::gameworld::resources::map::Map;
+use crate::common::Coords;
+//----------------------    
+
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum AccessKey { //add variants representing each Component or Resource as needed
     //Resources
@@ -39,6 +44,32 @@ impl ECSAccessPoint {
         ECSAccessPoint {
             accessors: Mutex::new(HashMap::new()),
             ecs,
+        }
+    }
+
+    //FOR TESTING ONLY
+    fn helper(map: &Map) {
+        for i in 0..map.size.pow(2) {
+            print!("{}", map.walls[i as usize]);
+        }
+    }
+
+    //FOR TESTING ONLY
+    pub fn print_map(&self) {
+        let access_guard = self.req_access(AccessKey::Map);
+        let map = access_guard.read_resource::<Map>(&self.ecs);
+
+        Self::helper(&map);
+
+        for i in 0..map.size {
+            print!("\n\r");
+            for j in 0..map.size {
+                if let Ok(wall_glyph) = Map::prettify_wall(map.size, &map.walls, Coords::new(i, j)) {
+                    print!("{}", wall_glyph);
+                } else {
+                    print!(".");
+                }
+            }
         }
     }
 

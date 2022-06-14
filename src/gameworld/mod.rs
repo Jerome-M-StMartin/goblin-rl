@@ -42,7 +42,8 @@ impl GameWorld {
 
         match cmd {
             MutateCommand::Test => {
-                println!("Test Successful! You just hit Enter/Return.\r");
+                //println!("Test Successful! You just hit Enter/Return.\r");
+                self.ecs_ap.print_map();
             }
             MutateCommand::Exit => {
                 return Ok(Ticker::ExitProgram);

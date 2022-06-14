@@ -25,12 +25,12 @@ mod map_builder;
 use usize as Index;
 
 pub struct Map {
-    dirty_flag: bool,
-    size: u16,
-    player_spawnpoint: Index,
-    walls: Vec<bool>, //Must be initialized to have size^2 elements.
-    blocked: Vec<bool>, //Must be initialized to have size^2 elements.
-    tile_contents: HashMap<Index, [Entity; 8]>,
+    pub dirty_flag: bool,
+    pub size: u16,
+    pub player_spawnpoint: Index,
+    pub walls: Vec<bool>, //Must be initialized to have size^2 elements.
+    pub blocked: Vec<bool>, //Must be initialized to have size^2 elements.
+    pub tile_contents: HashMap<Index, [Entity; 8]>,
 }
 
 impl Map {
@@ -53,10 +53,7 @@ impl Map {
         }
     }
 
-    pub fn is_dirty(&self) -> bool {
-        self.dirty_flag
-    }
-
+    ///Pure version also available
     pub fn coords_to_idx(&self, coords: Coords) -> Result<Index, Gremlin> {
         if coords.x < self.size && coords.y < self.size {
             return Ok( (coords.x + coords.y * self.size) as Index )
@@ -65,6 +62,7 @@ impl Map {
         Err( Gremlin::InvalidInput )
     }
 
+    ///Pure version also available
     pub fn idx_to_coords<T: Into<u32>>(&self, idx: T) -> Result<Coords, Gremlin> {
         let idx = idx.into();
         let size = self.size as u32;
@@ -77,7 +75,99 @@ impl Map {
         
         Err( Gremlin::InvalidInput )
     }
+    
+    /// Creates a 4-bit bitmask representing the orthogonally adjacent
+    /// tiles which are also walls, in order to determine which line-glyph
+    /// to draw for the passed-in wall tile.
+    pub fn prettify_wall(square_map_width: u16,
+                     walls_vec: &Vec<bool>,
+                     wall_coords: Coords) -> Result<char, Gremlin> {
+
+        let wall_idx = Map::pure_coords_to_idx(square_map_width, wall_coords)?;
+        if !walls_vec[wall_idx] {
+            return Err(Gremlin::InvalidInput)
+        };
+
+        let mut north: bool = false;
+        let mut east: bool = false;
+        let mut south: bool = false;
+        let mut west: bool = false;
+
+        if let Ok(north_coords) = Coords::north_of(wall_coords) {
+            let idx = Map::pure_coords_to_idx(square_map_width, north_coords)?;
+            north = walls_vec[idx];
+        }
+
+        if let Ok(east_coords) = Coords::east_of(wall_coords, square_map_width) {
+            let idx = Map::pure_coords_to_idx(square_map_width, east_coords)?;
+            east = walls_vec[idx];
+        }
+
+        if let Ok(south_coords) = Coords::south_of(wall_coords, square_map_width) {
+            let idx = Map::pure_coords_to_idx(square_map_width, south_coords)?;
+            south = walls_vec[idx];
+        }
+
+        if let Ok(west_coords) = Coords::west_of(wall_coords) {
+            let idx = Map::pure_coords_to_idx(square_map_width, west_coords)?;
+            west = walls_vec[idx];
+        }
+
+        let glyph = match (north, east, south, west) {
+            //Four Orthogonally Adjacent
+            (true, true, true, true) => { '╋' },
+
+            //Three Adjacent
+            (true, true, true, false) => { '┣' },
+            (true, true, false, true) => { '┻' },
+            (true, false, true, true) => { '┫' },
+            (false, true, true, true) => { '┳' },
+
+            //Two Adjacent
+            (true, true, false, false) => { '┗' },
+            (true, false, false, true) => { '┛' },
+            (false, false, true ,true) => { '┓' },
+            (false, true, true, false) => { '┏' },
+            (true, false, true, false) => { '┃' },
+            (false, true, false, true) => { '━' },
+
+            //One Adjacent
+            (true, false, false, false) => { '╹' },
+            (false, true, false, false) => { '╺' },
+            (false, false, true, false) => { '╻' },
+            (false, false, false, true) => { '╸' },
+
+            //None Adjacent
+            (false, false, false, false) => { '■' },
+        };
+
+        return Ok(glyph)
+    }
+
+    ///Method version also available
+    pub fn pure_coords_to_idx(square_map_width: u16, coords: Coords) -> Result<Index, Gremlin> {
+        if coords.x < square_map_width && coords.y < square_map_width {
+            return Ok( (coords.x + coords.y * square_map_width) as Index )
+        }
+        
+        Err( Gremlin::InvalidInput )
+    }
+
+    ///Method version also available
+    pub fn pure_idx_to_coords<T: Into<u32>>(square_map_width: u16, idx: T) -> Result<Coords, Gremlin> {
+        let idx = idx.into();
+        let size = square_map_width as u32;
+
+        if idx < size.pow(2) {
+            let x = (idx % size) as u16;
+            let y = (idx / size) as u16;
+            return Ok( Coords::new(x, y) )
+        }
+        
+        Err( Gremlin::InvalidInput )
+    }
 }
+
 
 
 

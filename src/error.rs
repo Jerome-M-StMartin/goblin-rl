@@ -15,6 +15,7 @@ pub enum Gremlin {
     //add variants as needed
     //Internal Errs
     InvalidInput,
+    OutOfMapBounds,
 
     //Outside Errs w/ Source Fields
     IOErr(std::io::Error),

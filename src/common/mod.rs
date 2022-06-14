@@ -1,6 +1,8 @@
 //Jerome M. St.Martin
 //May, 2022
 
+use crate::error::Gremlin;
+
 mod transmittables;
 
 pub use transmittables::*;
@@ -36,5 +38,30 @@ impl Coords {
             x: x.into(),
             y: y.into(),
         }
+    }
+
+    pub fn north_of(c: Coords) -> Result<Coords, Gremlin> {
+        if c.y > 0 {
+            return Ok(Coords::new(c.x, c.y - 1))
+        }
+        Err(Gremlin::OutOfMapBounds)
+    }
+    pub fn east_of(c: Coords, square_map_width: u16) -> Result<Coords, Gremlin> {
+        if c.x < square_map_width {
+            return Ok(Coords::new(c.x + 1, c.y))
+        }
+        Err(Gremlin::OutOfMapBounds)
+    }
+    pub fn south_of(c: Coords, square_map_width: u16) -> Result<Coords, Gremlin> {
+        if c.y < square_map_width {
+            return Ok(Coords::new(c.x, c.y + 1))
+        }
+        Err(Gremlin::OutOfMapBounds)
+    }
+    pub fn west_of(c: Coords) -> Result<Coords, Gremlin> {
+        if c.x > 0 {
+            return Ok(Coords::new(c.x - 1, c.y))
+        }
+        Err(Gremlin::OutOfMapBounds)
     }
 }
