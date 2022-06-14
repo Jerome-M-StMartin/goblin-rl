@@ -36,8 +36,7 @@ impl MapBuilder {
     pub fn build(self) -> Map {
         let mut map = Map::new(self.size.unwrap());
         
-        let mut idx: usize = 0;
-        for c in str_to_no_whitespace_chars(self.layout.unwrap()) {
+        for (idx, c) in str_to_no_whitespace_chars(self.layout.unwrap()).enumerate() {
             match c {
                 '#' => {
                     map.walls[idx] = true;
@@ -50,7 +49,6 @@ impl MapBuilder {
                 },
                 _ => { println!("c: {}\r", c); },
             }
-            idx += 1;
         }
 
         map

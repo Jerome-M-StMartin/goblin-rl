@@ -24,7 +24,7 @@ pub enum Dir {
     NW,
 }
 
-#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, Copy, Clone, Hash, Debug)]
 pub struct Coords {
     pub x: u16,
     pub y: u16,

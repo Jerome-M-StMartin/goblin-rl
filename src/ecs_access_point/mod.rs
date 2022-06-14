@@ -10,18 +10,23 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Condvar, Mutex};
 
-use specs::{error::Error, Component, Entity, World};
-
-use crate::error::Gremlin;
+use specs::{Component, Entity, World};
 
 mod storage_access_guard;
+mod resource_access_guard;
 
 pub use storage_access_guard::StorageAccessGuard;
+pub use resource_access_guard::ResourceAccessGuard;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub enum AccessKey {
-    TestComponent,
-    //add variants representing each component as components are implemented
+pub enum AccessKey { //add variants representing each Component or Resource as needed
+    //Resources
+    Map,
+    Player,
+
+    //Components
+    Hostile,
+    Position,
 }
 
 pub struct ECSAccessPoint {
@@ -53,12 +58,10 @@ impl ECSAccessPoint {
             .accessors
             .lock()
             .expect("Mutex found to be poisoned during ecs_ap.req_access()");
-
-        if !accessors.contains_key(&key) {
-            accessors.insert(key, Arc::new(AccessGuard::new()));
-        }
-
-        accessors.get(&key).unwrap().clone()
+        
+        accessors.entry(key) //If entry found, skip next line
+            .or_insert(Arc::new(AccessGuard::new())) //else insert new entry
+            .clone() //return the entry
     }
 }
 
@@ -97,35 +100,43 @@ impl Drop for AccessGuard {
             .lock()
             .expect("AccessGuard Mutex poisoned before .drop()");
 
-        if !access.write_allowed && !access.read_allowed {
-            //This AccessGuard was giving exclusive Write access,
-            //so it is now safe to allow any type of access.
-            access.write_allowed = true;
-            access.read_allowed = true;
-        } else if !access.write_allowed && access.read_allowed {
-            //This AccessGuard was granding non-exclusive Read access,
-            //so the reader count must be decremented.
+        match (access.write_allowed, access.read_allowed) {
+            (false, false) => {
+                //This AccessGuard was giving exclusive Write access,
+                //so it is now safe to allow any type of access.
+                access.write_allowed = true;
+                access.read_allowed = true;
+            },
 
-            //POSSIBLE WRITER-STARVATION PROBLEM, but I'm not sure it matters
-            //in this context? Like... all ECS work that will be done also must
-            //be done in-between each user input event. And every aspect of this
-            //program's multithreadedness is blocking... so doesn't that
-            //guarantee that write access will never be starved? I think yes.
+            (false, true) => {
+                //This AccessGuard was granding non-exclusive Read access,
+                //so the reader count must be decremented.
 
-            access.readers -= 1;
+                //POSSIBLE WRITER-STARVATION PROBLEM, but I'm not sure it matters
+                //in this context? Like... all ECS work that will be done also must
+                //be done in-between each user input event. And every aspect of this
+                //program's multithreadedness is blocking... so doesn't that
+                //guarantee that write access will never be starved? I think yes.
+                access.readers -= 1;
+
+                if access.readers == 0 {
+                    //Write access is allowed again, since there is no one with access currently.
+                    access.write_allowed = true;
+
+                    //Due to possible writer-starvation problem:
+                    //Here, if required, a thread awaiting WRITE access should be notified.
+                    //This behaviour requires a second Condvar in AccessGuard, specifically
+                    //used by threads waiting for Write access.
+                    //Seems unneccesary at this time, but I'll leave these notes for future me,
+                    //just in case I am very wrong, which has a definite non-zero probability.
+                }
+            },
+
+            (w, r) => {
+                panic!("This Condvar configuration should not be possible: ({}, {})", w, r)
+            },
         }
 
-        if access.readers == 0 {
-            //Write access is allowed again, since there is no one with access currently.
-            access.write_allowed = true;
-
-            //Due to possible writer-starvation problem:
-            //Here, if required, a thread awaiting WRITE access should be notified.
-            //This behaviour requires a second Condvar in AccessGuard, specifically
-            //used by threads waiting for Write access.
-            //Seems unneccesary at this time, but I'll leave these notes for future me,
-            //just in case I am very wrong, which has a definite non-zero probability.
-        }
 
         self.cvar.notify_all();
     }

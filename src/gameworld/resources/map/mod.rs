@@ -16,11 +16,9 @@ mod map_builder;
 //-----------------------------------------------------------------------------
 
 /* Abstract Tiles:
- * Each tile is represented by an Index,
- * which is used as a universal key into
- * the fields of the Map struct which
- * describe aspects of the map, and of
- * each tile in it.
+ * Each tile is represented by an Index, which is used as a universal key into
+ * the fields of the Map struct which describe aspects of the map, and of each
+ * tile in it.
  */
 
 // Type Aliasing
@@ -41,6 +39,8 @@ impl Map {
         map_builder::MapBuilder::new()
     }
 
+    //This should probably never be used directly,
+    //use the Builder Pattern functionality instead.
     pub fn new<T: Into<u16> + Copy>(size: T) -> Self
     {
         Map {
@@ -55,10 +55,6 @@ impl Map {
 
     pub fn is_dirty(&self) -> bool {
         self.dirty_flag
-    }
-
-    pub fn clean(&mut self) {
-        self.dirty_flag = false;
     }
 
     pub fn coords_to_idx(&self, coords: Coords) -> Result<Index, Gremlin> {

@@ -25,7 +25,7 @@ pub enum RunState {
     AwaitingInput { previous: Box<RunState> },
     GameOver,
     GameWorld,
-    GUI,
+    Tui,
     MainMenu,
     MapGeneration,
     NextLevel,
@@ -51,7 +51,7 @@ impl MainState {
             game_world,
             tui,
             tui_tx,
-            ecs_ap: ecs_ap,
+            ecs_ap,
             runstate: RunState::MainMenu,
         }
     }
@@ -72,7 +72,7 @@ impl MainState {
             RunState::AwaitingInput { previous: _prev } => {}
             RunState::GameOver => {}
             RunState::GameWorld => {}
-            RunState::GUI => {}
+            RunState::Tui => {}
             RunState::MainMenu => {}
             RunState::MapGeneration => {}
             RunState::NextLevel => {}

@@ -11,8 +11,8 @@ use super::Dir;
 ///Commands passed from Controller to View (in MVC) via mpsc::channels.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum InputEvent {
-    HJKL(Dir),
-    WASD(Dir),
+    Hjkl(Dir),
+    Wasd(Dir),
     Cancel,
     Confirm,
     Tab,
@@ -25,8 +25,7 @@ pub enum InputEvent {
 //------------------------ ------------- -------------------------
 
 //---------------------- View -> Model ---------------------
-///Commands passed from Controller to Model (in MVC) via mpsc::channels.
-///i.e. The Controller telling the Model: "Change the Game World in this way".
+///Commands passed from View to Model (in MVC) via mpsc::channels.
 #[derive(PartialEq, Eq, Debug)]
 pub enum MutateCommand {
     Test,

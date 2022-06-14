@@ -8,9 +8,18 @@
 use specs::prelude::*;
 use specs_derive::Component;
 
+use crate::common::Coords;
+
 pub(crate) fn register_all_components(w: &mut specs::World) {
-    w.register::<TestComponent>();
+    w.register::<Hostile>();
+    w.register::<Position>();
 }
 
+// Marker/Stateless Components
 #[derive(Debug, PartialEq, Eq, Hash, Component)]
-pub struct TestComponent {}
+pub struct Hostile {}
+
+// Stateful Components
+#[derive(Debug, PartialEq, Eq, Hash, Component)]
+pub struct Position(Coords);
+

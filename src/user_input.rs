@@ -30,10 +30,10 @@ impl UserInput {
                 match code {
                     KeyCode::Backspace => { msg = InputEvent::Delete },
                     KeyCode::Enter => { msg = InputEvent::Confirm },
-                    KeyCode::Left => { msg = InputEvent::HJKL(Dir::W) },
-                    KeyCode::Right => { msg = InputEvent::HJKL(Dir::E) },
-                    KeyCode::Up => { msg = InputEvent::HJKL(Dir::N) },
-                    KeyCode::Down => { msg = InputEvent::HJKL(Dir::S) },
+                    KeyCode::Left => { msg = InputEvent::Hjkl(Dir::W) },
+                    KeyCode::Right => { msg = InputEvent::Hjkl(Dir::E) },
+                    KeyCode::Up => { msg = InputEvent::Hjkl(Dir::N) },
+                    KeyCode::Down => { msg = InputEvent::Hjkl(Dir::S) },
                     KeyCode::Home => {},
                     KeyCode::End => {},
                     KeyCode::PageUp => {},
@@ -45,21 +45,21 @@ impl UserInput {
                     KeyCode::F(_) => { msg = InputEvent::Menu },
                     KeyCode::Char(c) => {
                         match c {
-                            //WASD
-                            'w' => { msg = InputEvent::WASD(Dir::N) },
-                            'e' => { msg = InputEvent::WASD(Dir::NE) },
-                            'd' => { msg = InputEvent::WASD(Dir::E) },
-                            'c' => { msg = InputEvent::WASD(Dir::SE) },
-                            's' => { msg = InputEvent::WASD(Dir::S) },
-                            'z' => { msg = InputEvent::WASD(Dir::SW) },
-                            'a' => { msg = InputEvent::WASD(Dir::W) },
-                            'q' => { msg = InputEvent::WASD(Dir::NW) },
+                            //Wasd
+                            'w' => { msg = InputEvent::Wasd(Dir::N) },
+                            'e' => { msg = InputEvent::Wasd(Dir::NE) },
+                            'd' => { msg = InputEvent::Wasd(Dir::E) },
+                            'c' => { msg = InputEvent::Wasd(Dir::SE) },
+                            's' => { msg = InputEvent::Wasd(Dir::S) },
+                            'z' => { msg = InputEvent::Wasd(Dir::SW) },
+                            'a' => { msg = InputEvent::Wasd(Dir::W) },
+                            'q' => { msg = InputEvent::Wasd(Dir::NW) },
                             
-                            //HJKL
-                            'h' => { msg = InputEvent::HJKL(Dir::W) },
-                            'j' => { msg = InputEvent::HJKL(Dir::S) },
-                            'k' => { msg = InputEvent::HJKL(Dir::N) },
-                            'l' => { msg = InputEvent::HJKL(Dir::E) },
+                            //Hjkl
+                            'h' => { msg = InputEvent::Hjkl(Dir::W) },
+                            'j' => { msg = InputEvent::Hjkl(Dir::S) },
+                            'k' => { msg = InputEvent::Hjkl(Dir::N) },
+                            'l' => { msg = InputEvent::Hjkl(Dir::E) },
 
                             _ => {},
                         }
