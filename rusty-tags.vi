@@ -5,8 +5,7 @@ A	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/sr
 ALIAS	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_derive-1.0.137/src/internals/symbol.rs	/^pub const ALIAS: Symbol = Symbol("alias");$/;"	c
 ALT	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/event.rs	/^        const ALT = 0b0000_0100;$/;"	c
 ALWAYS_TRUE	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/distributions/bernoulli.rs	/^const ALWAYS_TRUE: u64 = u64::MAX;$/;"	c
-Access	/home/wrmphlgm/1Projects/goblin-rl/src/ecs_access_point/mod.rs	/^struct Access {$/;"	s
-AccessGuard	/home/wrmphlgm/1Projects/goblin-rl/src/ecs_access_point/mod.rs	/^pub struct AccessGuard {$/;"	s
+AccessGuard	/home/wrmphlgm/1Projects/goblin-rl/src/ecs_access_point/mod.rs	/^pub struct AccessGuard(Arc<Accessor>);$/;"	s
 AccessKey	/home/wrmphlgm/1Projects/goblin-rl/src/ecs_access_point/mod.rs	/^pub enum AccessKey { \/\/add variants representing each Component or Resource as needed$/;"	g
 AccessMut	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/deref_flagged.rs	/^    type AccessMut<'a> where T: 'a = FlaggedAccessMut<'a, <T as UnprotectedStorage<C>>::AccessMut<'a>, C>;$/;"	T
 AccessMut	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/flagged.rs	/^    type AccessMut<'a> where T: 'a = <T as UnprotectedStorage<C>>::AccessMut<'a>;$/;"	T
@@ -17,6 +16,8 @@ AccessMut	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0
 AccessMut	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/storages.rs	/^    type AccessMut<'a> where T: 'a = &'a mut T;$/;"	T
 AccessMutReturn	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/mod.rs	/^type AccessMutReturn<'a, T> = &'a mut T;$/;"	T
 AccessMutReturn	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/mod.rs	/^type AccessMutReturn<'a, T> = <<T as Component>::Storage as UnprotectedStorage<T>>::AccessMut<'a>;$/;"	T
+Accessor	/home/wrmphlgm/1Projects/goblin-rl/src/ecs_access_point/mod.rs	/^pub struct Accessor {$/;"	s
+AccessorState	/home/wrmphlgm/1Projects/goblin-rl/src/ecs_access_point/mod.rs	/^struct AccessorState {$/;"	s
 Adapter	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/command.rs	/^    struct Adapter<T> {$/;"	s
 Allocator	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/saveload/marker.rs	/^    type Allocator = SimpleMarkerAllocator<T>;$/;"	T
 Allocator	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/saveload/marker.rs	/^    type Allocator: MarkerAllocator<Self>;$/;"	T
@@ -695,6 +696,7 @@ TaggedContent	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/ser
 TaggedContentVisitor	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde-1.0.137/src/private/de.rs	/^    pub struct TaggedContentVisitor<'de, T> {$/;"	s
 TaggedSerializer	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde-1.0.137/src/private/ser.rs	/^struct TaggedSerializer<S> {$/;"	s
 Target	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/deref_flagged.rs	/^    type Target = C;$/;"	T
+Target	/home/wrmphlgm/1Projects/goblin-rl/src/ecs_access_point/mod.rs	/^    type Target = Accessor;$/;"	T
 Task	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/event/stream.rs	/^struct Task {$/;"	s
 ThreadRng	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/rngs/thread.rs	/^pub struct ThreadRng {$/;"	s
 Ticker	/home/wrmphlgm/1Projects/goblin-rl/src/common/mod.rs	/^pub enum Ticker {$/;"	g
@@ -1142,6 +1144,7 @@ delete_entity	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/spe
 delete_twice	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/world/tests.rs	/^fn delete_twice() {$/;"	f
 deny_unknown_fields	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_derive-1.0.137/src/internals/attr.rs	/^    pub fn deny_unknown_fields(&self) -> bool {$/;"	f
 deref	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/deref_flagged.rs	/^    fn deref(&self) -> &Self::Target { self.access.deref() }$/;"	f
+deref	/home/wrmphlgm/1Projects/goblin-rl/src/ecs_access_point/mod.rs	/^    fn deref(&self) -> &Self::Target {$/;"	f
 deref_impl	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde-1.0.137/src/ser/impls.rs	/^macro_rules! deref_impl {$/;"	d
 deref_mut	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/deref_flagged.rs	/^    fn deref_mut(&mut self) -> &mut Self::Target {$/;"	f
 derive_deserialize	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_derive-1.0.137/src/lib.rs	/^pub fn derive_deserialize(input: TokenStream) -> TokenStream {$/;"	f
@@ -1944,13 +1947,11 @@ pretend_fields_used_struct	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc629
 pretend_fields_used_struct_packed	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_derive-1.0.137/src/pretend.rs	/^fn pretend_fields_used_struct_packed(cont: &Container, fields: &[Field]) -> TokenStream {$/;"	f
 pretend_used	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_derive-1.0.137/src/pretend.rs	/^pub fn pretend_used(cont: &Container, is_packed: bool) -> TokenStream {$/;"	f
 pretend_variants_used	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_derive-1.0.137/src/pretend.rs	/^fn pretend_variants_used(cont: &Container) -> TokenStream {$/;"	f
-prettify_wall	/home/wrmphlgm/1Projects/goblin-rl/src/gameworld/resources/map/mod.rs	/^    pub fn prettify_wall(square_map_width: u16,$/;"	f
+prettify_wall	/home/wrmphlgm/1Projects/goblin-rl/src/gameworld/resources/map/mod.rs	/^    pub fn prettify_wall(&self,$/;"	f
 primitive_deserializer	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde-1.0.137/src/de/value.rs	/^macro_rules! primitive_deserializer {$/;"	d
 primitive_impl	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde-1.0.137/src/ser/impls.rs	/^macro_rules! primitive_impl {$/;"	d
 print_map	/home/wrmphlgm/1Projects/goblin-rl/src/ecs_access_point/mod.rs	/^    pub fn print_map(&self) {$/;"	f
 private	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde-1.0.137/src/de/value.rs	/^mod private {$/;"	m
-pure_coords_to_idx	/home/wrmphlgm/1Projects/goblin-rl/src/gameworld/resources/map/mod.rs	/^    pub fn pure_coords_to_idx(square_map_width: u16, coords: Coords) -> Result<Index, Gremlin> {$/;"	f
-pure_idx_to_coords	/home/wrmphlgm/1Projects/goblin-rl/src/gameworld/resources/map/mod.rs	/^    pub fn pure_idx_to_coords<T: Into<u32>>(square_map_width: u16, idx: T) -> Result<Coords, Gremlin> {$/;"	f
 queue	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/command.rs	/^    fn queue(&mut self, command: impl Command) -> Result<&mut Self> {$/;"	f
 queue	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/command.rs	/^    fn queue(&mut self, command: impl Command) -> Result<&mut Self>;$/;"	f
 queue	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/macros.rs	/^macro_rules! queue {$/;"	d
@@ -2007,7 +2008,7 @@ replace	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.1
 replace_entity_type	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-derive-0.4.1/src/impl_saveload.rs	/^fn replace_entity_type(ty: &mut Type) {$/;"	f
 replace_receiver	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_derive-1.0.137/src/internals/receiver.rs	/^pub fn replace_receiver(input: &mut DeriveInput) {$/;"	f
 replacement	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_derive-1.0.137/src/try.rs	/^pub fn replacement() -> TokenStream {$/;"	f
-req_access	/home/wrmphlgm/1Projects/goblin-rl/src/ecs_access_point/mod.rs	/^    fn req_access(&self, key: AccessKey) -> Arc<AccessGuard> {$/;"	f
+req_access	/home/wrmphlgm/1Projects/goblin-rl/src/ecs_access_point/mod.rs	/^    fn req_access(&self, key: AccessKey) -> AccessGuard {$/;"	f
 requires_default	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_derive-1.0.137/src/de.rs	/^fn requires_default(field: &attr::Field, _variant: Option<&attr::Variant>) -> bool {$/;"	f
 reseed	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/rngs/adapter/reseeding.rs	/^    fn reseed(&mut self) -> Result<(), Error> {$/;"	f
 reseed	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/rngs/adapter/reseeding.rs	/^    pub fn reseed(&mut self) -> Result<(), Error> {$/;"	f
@@ -2335,9 +2336,10 @@ test	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/s
 test	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/seq/mod.rs	/^mod test {$/;"	m
 test	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/changeset.rs	/^    fn test() {$/;"	f
 test	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/tests.rs	/^mod test {$/;"	m
+test	/home/wrmphlgm/1Projects/goblin-rl/src/common/mod.rs	/^mod test {$/;"	m
 test	/home/wrmphlgm/1Projects/goblin-rl/src/gameworld/resources/map/mod.rs	/^mod test {$/;"	m
-test_0	/home/wrmphlgm/1Projects/goblin-rl/src/gameworld/mod.rs	/^    fn test_0() {}$/;"	f
 test_0	/home/wrmphlgm/1Projects/goblin-rl/src/tui/mod.rs	/^    fn test_0() {}$/;"	f
+test_3x3	/home/wrmphlgm/1Projects/goblin-rl/src/gameworld/resources/map/precon.rs	/^pub fn test_3x3() -> PreCon {$/;"	f
 test_accepting_nan	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/distributions/weighted_index.rs	/^    fn test_accepting_nan(){$/;"	f
 test_add	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/tests.rs	/^    fn test_add<T: Component + From<u32> + Debug + Eq>()$/;"	f
 test_add_gen	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/tests.rs	/^    fn test_add_gen<T: Component + From<u32> + Debug + Eq>()$/;"	f
@@ -2367,6 +2369,7 @@ test_dist_string	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/
 test_distributions_iter	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/distributions/distribution.rs	/^    fn test_distributions_iter() {$/;"	f
 test_distributions_map	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/distributions/distribution.rs	/^    fn test_distributions_map() {$/;"	f
 test_durations	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/distributions/uniform.rs	/^    fn test_durations() {$/;"	f
+test_east_of	/home/wrmphlgm/1Projects/goblin-rl/src/common/mod.rs	/^    fn test_east_of() {$/;"	f
 test_elapsed_timeout_has_zero_leftover	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/event/timeout.rs	/^    pub fn test_elapsed_timeout_has_zero_leftover() {$/;"	f
 test_equality	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/event.rs	/^    fn test_equality() {$/;"	f
 test_esc_key	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/event/sys/unix/parse.rs	/^    fn test_esc_key() {$/;"	f
@@ -2433,6 +2436,7 @@ test_move_up_winapi	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec8
 test_multiple_weighted_distributions	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/seq/mod.rs	/^    fn test_multiple_weighted_distributions() {$/;"	f
 test_multiple_weighted_edge_cases	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/seq/mod.rs	/^    fn test_multiple_weighted_edge_cases() {$/;"	f
 test_nonzero_optimization	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/world/entity.rs	/^    fn test_nonzero_optimization() {$/;"	f
+test_north_of	/home/wrmphlgm/1Projects/goblin-rl/src/common/mod.rs	/^    fn test_north_of() {$/;"	f
 test_not_elapsed_timeout_has_positive_leftover	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/event/timeout.rs	/^    pub fn test_not_elapsed_timeout_has_positive_leftover() {$/;"	f
 test_null_insert_twice	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/tests.rs	/^    fn test_null_insert_twice() {$/;"	f
 test_original_console_color_is_set	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/style/sys/windows.rs	/^    fn test_original_console_color_is_set() {$/;"	f
@@ -2507,6 +2511,7 @@ test_set_title_winapi	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9e
 test_shuffle	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/seq/mod.rs	/^    fn test_shuffle() {$/;"	f
 test_slice_access	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/tests.rs	/^    fn test_slice_access<T: Component + From<u32> + Debug + Eq>()$/;"	f
 test_slice_choose	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/seq/mod.rs	/^    fn test_slice_choose() {$/;"	f
+test_south_of	/home/wrmphlgm/1Projects/goblin-rl/src/common/mod.rs	/^    fn test_south_of() {$/;"	f
 test_stdrng_construction	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/rngs/std.rs	/^    fn test_stdrng_construction() {$/;"	f
 test_sub	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/tests.rs	/^    fn test_sub<T: Component + From<u32> + Debug + Eq>()$/;"	f
 test_sub_gen	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/tests.rs	/^    fn test_sub_gen<T: Component + From<u32> + Debug + Eq>()$/;"	f
@@ -2527,6 +2532,7 @@ test_utf8	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crosste
 test_weighted	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/seq/mod.rs	/^    fn test_weighted() {$/;"	f
 test_weightedindex	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/distributions/weighted_index.rs	/^    fn test_weightedindex() {$/;"	f
 test_weightedindex_serde1	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.8.5/src/distributions/weighted_index.rs	/^    fn test_weightedindex_serde1() {$/;"	f
+test_west_of	/home/wrmphlgm/1Projects/goblin-rl/src/common/mod.rs	/^    fn test_west_of() {$/;"	f
 tests	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/cursor.rs	/^mod tests {$/;"	m
 tests	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/cursor/sys/windows.rs	/^mod tests {$/;"	m
 tests	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/event.rs	/^mod tests {$/;"	m
@@ -2555,7 +2561,6 @@ tests	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.
 tests	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/data.rs	/^mod tests {$/;"	m
 tests	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/drain.rs	/^mod tests {$/;"	m
 tests	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/world/entity.rs	/^mod tests {$/;"	m
-tests	/home/wrmphlgm/1Projects/goblin-rl/src/gameworld/mod.rs	/^mod tests {$/;"	m
 tests	/home/wrmphlgm/1Projects/goblin-rl/src/tui/mod.rs	/^mod tests {$/;"	m
 tests_inline	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/specs-0.17.0/src/storage/mod.rs	/^mod tests_inline {$/;"	m
 then	/home/wrmphlgm/.cargo/registry/src/github.com-1ecc6299db9ec823/crossterm-0.23.2/src/style/types/colors.rs	/^    pub fn then(&self, other: &Colors) -> Colors {$/;"	f

@@ -35,7 +35,7 @@ pub enum AccessKey { //add variants representing each Component or Resource as n
 }
 
 pub struct ECSAccessPoint {
-    accessors: Mutex<HashMap<AccessKey, Arc<AccessGuard>>>,
+    accessors: Mutex<HashMap<AccessKey, Arc<Accessor>>>,
     ecs: World,
 }
 
@@ -49,9 +49,17 @@ impl ECSAccessPoint {
 
     //FOR TESTING ONLY
     fn helper(map: &Map) {
-        for i in 0..map.size.pow(2) {
-            print!("{}", map.walls[i as usize]);
+        let mut idx = 0;
+        for _ in 0..map.size {
+            print!("\n\r");
+            for _ in 0..map.size {
+                let glyph: char;
+                if map.walls[idx as usize] { glyph = '#'; } else { glyph = '.'; };
+                print!("{}", glyph);
+                idx += 1;
+            }
         }
+        print!("\n\r");
     }
 
     //FOR TESTING ONLY
@@ -64,13 +72,14 @@ impl ECSAccessPoint {
         for i in 0..map.size {
             print!("\n\r");
             for j in 0..map.size {
-                if let Ok(wall_glyph) = Map::prettify_wall(map.size, &map.walls, Coords::new(i, j)) {
+                if let Ok(wall_glyph) = map.prettify_wall(&map.walls, Coords::new(j, i)) {
                     print!("{}", wall_glyph);
                 } else {
                     print!(".");
                 }
             }
         }
+        print!("\n\r");
     }
 
     pub fn insert_component<T: Component>(
@@ -84,37 +93,39 @@ impl ECSAccessPoint {
             .insert(e, c)
     }
 
-    fn req_access(&self, key: AccessKey) -> Arc<AccessGuard> {
+    fn req_access(&self, key: AccessKey) -> AccessGuard {
         let mut accessors = self
             .accessors
             .lock()
             .expect("Mutex found to be poisoned during ecs_ap.req_access()");
         
-        accessors.entry(key) //If entry found, skip next line
-            .or_insert(Arc::new(AccessGuard::new())) //else insert new entry
-            .clone() //return the entry
+        let accessor_arc = accessors.entry(key) //If AccessGuard found, skip next line
+            .or_insert(Arc::new(Accessor::new())) //else insert new AccessGuard
+            .clone();
+
+        AccessGuard::new(accessor_arc)
     }
 }
 
 //These structs must be wrapped in a Mutex.
 #[derive(Debug)]
-struct Access {
+//struct Access {
+struct AccessorState {
     pub readers: u8,
     pub read_allowed: bool,
     pub write_allowed: bool,
 }
 
-// These structs must be wrapped in an Arc<> before being
-// passed to the thread(s) which is/are seeking access.
-pub struct AccessGuard {
-    mtx: Mutex<Access>,
+//new abstraction
+pub struct Accessor {
+    mtx: Mutex<AccessorState>,
     cvar: Condvar,
 }
 
-impl AccessGuard {
+impl Accessor {
     pub(super) fn new() -> Self {
-        AccessGuard {
-            mtx: Mutex::new(Access {
+        Accessor {
+            mtx: Mutex::new(AccessorState {
                 readers: 0,
                 read_allowed: true,
                 write_allowed: true,
@@ -124,8 +135,25 @@ impl AccessGuard {
     }
 }
 
+pub struct AccessGuard(Arc<Accessor>);
+
+impl AccessGuard {
+    pub(super) fn new(accessor: Arc<Accessor>) -> Self {
+        AccessGuard(accessor.clone())
+    }
+}
+
+impl std::ops::Deref for AccessGuard {
+    type Target = Accessor;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl Drop for AccessGuard {
     fn drop(&mut self) {
+
         let mut access = self
             .mtx
             .lock()

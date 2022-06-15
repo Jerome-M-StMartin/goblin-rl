@@ -30,3 +30,15 @@ pub fn empty_10x10() -> PreCon {
     }
 }
 
+pub fn test_3x3() -> PreCon {
+    let map_str = "
+    ###
+    ###
+    ###
+    ";
+
+    PreCon {
+        size: 3,
+        layout: map_str,
+    }
+}

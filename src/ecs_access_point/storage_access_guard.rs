@@ -10,7 +10,7 @@ use specs::{
     Component, WorldExt,
 };
 
-use super::{Access, AccessGuard};
+use super::{AccessorState, AccessGuard};
 
 pub trait StorageAccessGuard<'a> {
     fn read_storage<T: Component>(&self, ecs: &'a specs::World) -> ReadStorage<'a, T>;
@@ -24,16 +24,16 @@ impl<'a> StorageAccessGuard<'a> for AccessGuard {
         //While read access is NOT allowed, wait until the calling thread is notified on the
         //condvar. Once the condvar (cvar) is notified, the calling thread is awoken,
         //the lock for the mutex (mtx) is acquired, and execution of this function continues.
-        let mut access: std::sync::MutexGuard<'_, Access> = self
+        let mut accessor_state: std::sync::MutexGuard<'_, AccessorState> = self
             .cvar
-            .wait_while(self.mtx.lock().expect(READ_ERR_MSG), |acc: &mut Access| {
-                !acc.read_allowed
+            .wait_while(self.mtx.lock().expect(READ_ERR_MSG), |acc_state: &mut AccessorState| {
+                !acc_state.read_allowed
             })
             .expect(READ_ERR_MSG);
 
-        access.read_allowed = true;
-        access.write_allowed = false;
-        access.readers += 1;
+        accessor_state.read_allowed = true;
+        accessor_state.write_allowed = false;
+        accessor_state.readers += 1;
 
         ecs.read_component()
     }
@@ -44,15 +44,15 @@ impl<'a> StorageAccessGuard<'a> for AccessGuard {
         /*While write access is NOT allowed, wait until the calling thread is notified on the
          * condvar. Once the condvar is notified, the calling thread is awoken,
          * the lock for the mutex is acquired, and the execution of this function continues.*/
-        let mut access: std::sync::MutexGuard<'_, Access> = self
+        let mut accessor_state: std::sync::MutexGuard<'_, AccessorState> = self
             .cvar
-            .wait_while(self.mtx.lock().expect(WRITE_ERR_MSG), |acc: &mut Access| {
-                !acc.write_allowed
+            .wait_while(self.mtx.lock().expect(WRITE_ERR_MSG), |acc_state: &mut AccessorState| {
+                !acc_state.write_allowed
             })
             .expect(WRITE_ERR_MSG);
 
-        access.read_allowed = false;
-        access.write_allowed = false;
+        accessor_state.read_allowed = false;
+        accessor_state.write_allowed = false;
 
         ecs.write_component()
     }

@@ -54,10 +54,3 @@ impl GameWorld {
         Ok(Ticker::Continue)
     }
 }
-
-#[cfg(test)]
-mod tests {
-
-    #[test]
-    fn test_0() {}
-}
