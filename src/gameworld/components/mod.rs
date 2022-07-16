@@ -11,13 +11,13 @@ use specs_derive::Component;
 use crate::common::Coords;
 
 pub(crate) fn register_all_components(w: &mut specs::World) {
-    w.register::<Hostile>();
+    w.register::<Player>();
     w.register::<Position>();
 }
 
 // Marker/Stateless Components
 #[derive(Debug, PartialEq, Eq, Hash, Component)]
-pub struct Hostile {}
+pub struct Player {}
 
 // Stateful Components
 #[derive(Debug, PartialEq, Eq, Hash, Component)]

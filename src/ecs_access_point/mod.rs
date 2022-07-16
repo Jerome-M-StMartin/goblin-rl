@@ -109,14 +109,12 @@ impl ECSAccessPoint {
 
 //These structs must be wrapped in a Mutex.
 #[derive(Debug)]
-//struct Access {
 struct AccessorState {
     pub readers: u8,
     pub read_allowed: bool,
     pub write_allowed: bool,
 }
 
-//new abstraction
 pub struct Accessor {
     mtx: Mutex<AccessorState>,
     cvar: Condvar,

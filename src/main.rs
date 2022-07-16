@@ -17,8 +17,6 @@ mod user_input;
 use ecs_access_point::ECSAccessPoint;
 use gameworld::{components, resources};
 
-const MAP_SIZE: u16 = 10;
-
 fn main() {
 
     // ECS Initialization
@@ -41,7 +39,7 @@ fn main() {
      */
     // Init & Spawn the GameWorld thread
     let gw_thread = thread::spawn(move || {
-        let mut gw = gameworld::GameWorld::new(MAP_SIZE, mutate_rx, delta_tx, gw_ecs_ap);
+        let mut gw = gameworld::GameWorld::new(mutate_rx, delta_tx, gw_ecs_ap);
 
         loop {
             match gw.tick() {

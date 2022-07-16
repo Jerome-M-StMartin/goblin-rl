@@ -9,13 +9,14 @@ use std::sync::{
 //specs lib docs say this should be imported over just World
 
 use crate::common::{DeltaNotification, MutateCommand, Ticker};
-use crate::ecs_access_point::{AccessKey, ECSAccessPoint, StorageAccessGuard};
+use crate::ecs_access_point::ECSAccessPoint;
 use crate::error::Gremlin;
 
 //ECS Modules
 pub mod components;
 pub mod resources;
 mod systems;
+mod entities;
 
 pub struct GameWorld {
     channel: (Receiver<MutateCommand>, SyncSender<DeltaNotification>),
@@ -24,7 +25,6 @@ pub struct GameWorld {
 
 impl GameWorld {
     pub fn new(
-        map_size: u16, //unused is OK, test-map precon doesn't take a size
         rx: Receiver<MutateCommand>,
         tx: SyncSender<DeltaNotification>,
         ecs_ap: Arc<ECSAccessPoint>,
